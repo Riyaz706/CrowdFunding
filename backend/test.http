@@ -1,0 +1,79 @@
+### Register a new user
+
+POST http://localhost:3000/common-api/register
+Content-Type: application/json
+
+{
+"firstName": "vivek",
+"lastName": "kasarla",
+"email": "vivek@gmail.com",
+"password": "12345678"
+}
+
+
+// Login with the registered user
+###
+POST  http://localhost:3000/common-api/login
+Content-Type: application/json
+
+{
+"email": "vivek@gmail.com",
+"password": "12345678"
+}
+
+
+### Get the list of campaigns for the logged-in user
+GET http://localhost:3000/user-api/campaigns
+
+
+### Create a new campaign
+POST http://localhost:3000/user-api/create-campaign
+Content-Type: application/json
+
+{
+"title": "Medical help",
+"description": "Need money for surgery",
+"goalAmount": 100000,
+"deadline": "2026-06-01",
+"creator": "69a6904158ffdf166b676eb2"
+}
+
+
+### Donate to a campaign
+POST http://localhost:3000/user-api/create-payment-intent
+Content-Type: application/json
+
+{
+    "amount": 5000,
+    "campaignId": "69b7b6924a8c3028217e052b"
+}
+
+
+### Admin view campaigns
+GET http://localhost:3000/admin-api/campaigns
+
+
+### Admin approve a campaign
+PUT http://localhost:3000/admin-api/campaign/69b7b6924a8c3028217e052b
+Content-Type: application/json
+
+{
+    "status": true
+}
+
+### get the details of a campaign
+GET http://localhost:3000/user-api/campaign/69b7b6924a8c3028217e052b
+
+
+
+###get the donor details of a campaign
+GET http://localhost:3000/user-api/campaign-history/69b7b6924a8c3028217e052b
+
+
+
+### Logout the user
+POST http://localhost:3000/common-api/logout
+
+
+
+
