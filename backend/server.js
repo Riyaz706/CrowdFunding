@@ -23,7 +23,7 @@ app.use(exp.json({
 }));
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175", process.env.FRONTEND_URL].filter(Boolean),
     credentials: true
 }));
 
@@ -31,8 +31,9 @@ const connection = async() => {
     try{
         let connect = await mongoose.connect(process.env.DB_URL)
         console.log("DB connected successfully");
-        app.listen(process.env.PORT, () => {
-            console.log("App is listening on Port", process.env.PORT);
+        const port = process.env.PORT || 3000;
+        app.listen(port, () => {
+            console.log("App is listening on Port", port);
         });
     }catch(err){
         console.log(err.message);

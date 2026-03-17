@@ -26,7 +26,7 @@ function DonorTracking() {
         endpoint = type === 'sent' ? 'my-donations' : 'received-donations';
       }
 
-      const response = await axios.get(`http://localhost:3000/user-api/${endpoint}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/user-api/${endpoint}`, {
         withCredentials: true
       });
       setData(response.data.payload);
@@ -51,7 +51,7 @@ function DonorTracking() {
           const processed = sessionStorage.getItem(`processed_${paymentIntent}`);
           if (!processed) {
             setActiveTab('donations');
-            await axios.get(`http://localhost:3000/user-api/verify-payment/${paymentIntent}`, {
+            await axios.get(`${import.meta.env.VITE_API_BASE_URL}/user-api/verify-payment/${paymentIntent}`, {
                withCredentials: true
             });
             console.log("✅ Payment verified successfully");
