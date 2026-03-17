@@ -31,36 +31,36 @@ app.use(cors({
 
 const connection = async() => {
     try{
-        let connect = await mongoose.connect(process.env.DB_URL)
+        await mongoose.connect(process.env.DB_URL);
         console.log("DB connected successfully");
-        
-        // Serve static files in production
-        if (process.env.NODE_ENV === "production") {
-            const path = await import("path");
-            const { fileURLToPath } = await import("url");
-            const __filename = fileURLToPath(import.meta.url);
-            const __dirname = path.dirname(__filename);
-            
-            app.use(exp.static(path.join(__dirname, "../frontend/dist")));
-            
-            app.get("*", (req, res) => {
-                if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
-                    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-                }
-            });
-        }
-
-        app.listen(process.env.PORT || 3000, () => {
-            console.log("App is listening on Port", process.env.PORT || 3000);
-        });
-    }catch(err){
-        console.log(err.message);
+        initCampaignScheduler();
+    } catch(err) {
+        console.error("❌ MongoDB Connection Error:", err.message);
+        // Do not block app.listen if DB fails; let Render detect the open port
     }
 }
 
-import { initCampaignScheduler } from "./services/scheduler.js";
-connection().then(() => {
-    initCampaignScheduler();
+// Serve static files in production
+if (process.env.NODE_ENV === "production") {
+    const path = await import("path");
+    const { fileURLToPath } = await import("url");
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    
+    app.use(exp.static(path.join(__dirname, "../frontend/dist")));
+    
+    app.get("*", (req, res) => {
+        if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
+            res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+        }
+    });
+}
+
+// Start the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log("App is listening on Port", port);
+    connection(); // Start DB connection in background
 });
 
 // routes to redirect
