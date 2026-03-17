@@ -25,23 +25,24 @@ app.use(exp.json({
 app.use(cookieParser());
 app.use(cors({
     origin: (origin, callback) => {
-        // Log for debugging on Render
-        if (process.env.NODE_ENV === "production") {
-            console.log(`🔍 CORS check for origin: ${origin}`);
-        }
-
         const devOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"];
-        const prodOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) : [];
+        const rawProdOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
+        const prodOrigins = rawProdOrigins.map(url => url.trim().replace(/['"]/g, "").replace(/\/$/, ""));
         
         const allAllowed = [...devOrigins, ...prodOrigins];
-        
-        // Remove trailing slash from incoming origin for comparison
         const cleanOrigin = origin ? origin.replace(/\/$/, "") : null;
+
+        // More detailed logging for production debugging
+        if (process.env.NODE_ENV === "production" && origin) {
+            const isMatch = !cleanOrigin || allAllowed.includes(cleanOrigin);
+            if (!isMatch) {
+                console.warn(`🔒 CORS Mismatch: Origin "${origin}" is not in allowed list [${allAllowed.join(", ")}]`);
+            }
+        }
 
         if (!cleanOrigin || allAllowed.includes(cleanOrigin)) {
             callback(null, true);
         } else {
-            console.warn(`⚠️ CORS blocked: ${origin} not in [${allAllowed.join(", ")}]`);
             callback(null, false);
         }
     },
@@ -98,6 +99,8 @@ console.log(`📡 Attempting to start server on port ${port}...`);
 
 app.listen(port, "0.0.0.0", () => {
     console.log(`✅ App is listening on Port ${port}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🔗 Allowed Origins: ${process.env.FRONTEND_URL || "NOT SET (Only localhost allowed)"}`);
     connection().catch(err => console.error("Critical DB failure:", err));
 });
 
