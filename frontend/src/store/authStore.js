@@ -11,7 +11,7 @@ export const authStore = create((set, get) => ({
     const { role, ...userCred } = userCredWithRole;
     try {
       set({ loading: true, error: null });
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/common-api/login`, userCred, { withCredentials: true });
+      const res = await axios.post("http://localhost:3000/common-api/login", userCred, { withCredentials: true });
       console.log("Login Response:", res.data);
 
       set({

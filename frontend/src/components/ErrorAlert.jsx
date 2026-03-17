@@ -11,6 +11,7 @@ const ErrorAlert = ({ message }) => {
       <p className="text-sm font-bold text-red-600">{message}</p>
     </div>
   );
+
 };
 
 export default ErrorAlert;
