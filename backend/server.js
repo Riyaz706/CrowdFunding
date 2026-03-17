@@ -25,17 +25,24 @@ app.use(exp.json({
 app.use(cookieParser());
 app.use(cors({
     origin: (origin, callback) => {
-        if (process.env.NODE_ENV !== "production") {
-            const devOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"];
-            if (!origin || devOrigins.includes(origin)) return callback(null, true);
+        // Log for debugging on Render
+        if (process.env.NODE_ENV === "production") {
+            console.log(`🔍 CORS check for origin: ${origin}`);
         }
 
-        const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
-        if (!origin || allowedOrigins.includes(origin)) {
+        const devOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"];
+        const prodOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim().replace(/\/$/, "")) : [];
+        
+        const allAllowed = [...devOrigins, ...prodOrigins];
+        
+        // Remove trailing slash from incoming origin for comparison
+        const cleanOrigin = origin ? origin.replace(/\/$/, "") : null;
+
+        if (!cleanOrigin || allAllowed.includes(cleanOrigin)) {
             callback(null, true);
         } else {
-            console.warn(`⚠️ CORS blocked for origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
-            callback(new Error('Not allowed by CORS'));
+            console.warn(`⚠️ CORS blocked: ${origin} not in [${allAllowed.join(", ")}]`);
+            callback(null, false);
         }
     },
     credentials: true
@@ -59,11 +66,22 @@ if (process.env.NODE_ENV === "production") {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     
+    const fs = await import("fs");
+    const indexPath = path.join(__dirname, "../frontend/dist/index.html");
+    
     app.use(exp.static(path.join(__dirname, "../frontend/dist")));
     
     app.get(/.*/, (req, res) => {
+        // Only try to serve index.html if it's NOT an API route
         if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
-            res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+            if (fs.existsSync(indexPath)) {
+                res.sendFile(indexPath);
+            } else {
+                res.status(404).json({
+                    message: "Frontend build not found on this server. If you are using Vercel, use your Vercel URL instead.",
+                    api_status: "API is running correctly"
+                });
+            }
         }
     });
 }
