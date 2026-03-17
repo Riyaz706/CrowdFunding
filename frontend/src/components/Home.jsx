@@ -15,7 +15,7 @@ function Home() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/common-api/stats`);
+        const res = await axios.get("http://localhost:3000/common-api/stats");
         setStats(res.data.payload);
       } catch (err) {
         console.error("Error fetching global stats:", err);

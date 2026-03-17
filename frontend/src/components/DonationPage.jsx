@@ -70,7 +70,7 @@ function DonationPage() {
 
     const fetchCampaign = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user-api/campaign/${campaignId}`);
+        const response = await axios.get(`http://localhost:3000/user-api/campaign/${campaignId}`);
         setCampaign(response.data.payload);
       } catch (err) {
         setError('Campaign not found.');
@@ -88,7 +88,7 @@ function DonationPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user-api/create-payment-intent`, {
+      const response = await axios.post('http://localhost:3000/user-api/create-payment-intent', {
         amount: parseInt(amount),
         campaignId,
         description // Pass message to backend

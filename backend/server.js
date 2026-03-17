@@ -8,7 +8,6 @@ import userApp from "./routes/userApi.js";
 import adminApp from "./routes/AdminApi.js";
 import commonApp from "./routes/commonApp.js";
 import { donationModel } from "./models/donationModel.js";  
-import { initCampaignScheduler } from "./services/scheduler.js";
 
 // create the server
 const app = exp();
@@ -24,90 +23,25 @@ app.use(exp.json({
 }));
 app.use(cookieParser());
 app.use(cors({
-    origin: (origin, callback) => {
-        const devOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"];
-        const rawProdOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
-        const prodOrigins = rawProdOrigins.map(url => {
-            let cleaned = url.trim().replace(/['"]/g, "").replace(/\/$/, "");
-            if (cleaned && !cleaned.startsWith('http')) {
-                cleaned = `https://${cleaned}`;
-            }
-            return cleaned;
-        });
-        
-        const allAllowed = [...devOrigins, ...prodOrigins];
-        const cleanOrigin = origin ? origin.replace(/\/$/, "") : null;
-
-        // More detailed logging for production debugging
-        if (process.env.NODE_ENV === "production" && origin) {
-            const isMatch = !cleanOrigin || allAllowed.includes(cleanOrigin);
-            if (!isMatch) {
-                console.warn(`🔒 CORS Mismatch: Origin "${origin}" is not in allowed list [${allAllowed.join(", ")}]`);
-            }
-        }
-
-        if (!cleanOrigin || allAllowed.includes(cleanOrigin)) {
-            callback(null, true);
-        } else {
-            callback(null, false);
-        }
-    },
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"],
     credentials: true
 }));
 
 const connection = async() => {
     try{
-        await mongoose.connect(process.env.DB_URL);
+        let connect = await mongoose.connect(process.env.DB_URL)
         console.log("DB connected successfully");
-        initCampaignScheduler();
-    } catch(err) {
-        console.error("❌ MongoDB Connection Error:", err.message);
-        // Do not block app.listen if DB fails; let Render detect the open port
+        app.listen(process.env.PORT, () => {
+            console.log("App is listening on Port", process.env.PORT);
+        });
+    }catch(err){
+        console.log(err.message);
     }
 }
 
-// Serve static files in production
-if (process.env.NODE_ENV === "production") {
-    const path = await import("path");
-    const { fileURLToPath } = await import("url");
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    
-    const fs = await import("fs");
-    const indexPath = path.join(__dirname, "../frontend/dist/index.html");
-    
-    app.use(exp.static(path.join(__dirname, "../frontend/dist")));
-    
-    app.get(/.*/, (req, res) => {
-        // Only try to serve index.html if it's NOT an API route
-        if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
-            if (fs.existsSync(indexPath)) {
-                res.sendFile(indexPath);
-            } else {
-                res.status(404).json({
-                    message: "Frontend build not found on this server. If you are using Vercel, use your Vercel URL instead.",
-                    api_status: "API is running correctly"
-                });
-            }
-        }
-    });
-}
-
-// Health check for deployment
-app.get("/health", (req, res) => res.status(200).send("OK"));
-
-// Redirect root to home
-app.get("/", (req, res) => res.redirect("/home"));
-
-// Start the server
-const port = process.env.PORT || 3000;
-console.log(`📡 Attempting to start server on port ${port}...`);
-
-app.listen(port, "0.0.0.0", () => {
-    console.log(`✅ App is listening on Port ${port}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-    console.log(`🔗 Allowed Origins: ${process.env.FRONTEND_URL || "NOT SET (Only localhost allowed)"}`);
-    connection().catch(err => console.error("Critical DB failure:", err));
+import { initCampaignScheduler } from "./services/scheduler.js";
+connection().then(() => {
+    initCampaignScheduler();
 });
 
 // routes to redirect

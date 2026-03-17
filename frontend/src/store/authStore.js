@@ -11,7 +11,7 @@ export const authStore = create((set, get) => ({
     const { role, ...userCred } = userCredWithRole;
     try {
       set({ loading: true, error: null });
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/common-api/login`, userCred, { withCredentials: true });
+      const res = await axios.post("http://localhost:3000/common-api/login", userCred, { withCredentials: true });
       console.log("Login Response:", res.data);
 
       set({
@@ -34,7 +34,7 @@ export const authStore = create((set, get) => ({
   checkAuth: async () => {
     try {
       set({ loading: true });
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/common-api/verify-auth`, { withCredentials: true });
+      const res = await axios.get("http://localhost:3000/common-api/verify-auth", { withCredentials: true });
       set({
         isAuthenticated: true,
         currentUser: res.data.payload,
@@ -54,7 +54,7 @@ export const authStore = create((set, get) => ({
   logout: async () => {
     set({ loading: true, error: null });
     try {
-      await axios.get(`${import.meta.env.VITE_API_URL}/common-api/logout`, { withCredentials: true });
+      await axios.get("http://localhost:3000/common-api/logout", { withCredentials: true });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {

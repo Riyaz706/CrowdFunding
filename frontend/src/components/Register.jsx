@@ -25,7 +25,7 @@ function Register() {
     try {
       setLoading(true);
       setError(null);
-      const url = `${import.meta.env.VITE_API_URL}/common-api/register`;
+      const url = 'http://localhost:3000/common-api/register';
       const res = await axios.post(url, data);
 
       if (res.status === 201 || res.status === 200) {

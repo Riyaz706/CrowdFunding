@@ -32,7 +32,7 @@ export const sendWelcomeEmail = async (userEmail, name) => {
                     Start exploring projects or create your own movement today!
                 </p>
                 <div style="margin-top: 30px;">
-                    <a href="${process.env.FRONTEND_URL}/campaigns" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Explore Projects</a>
+                    <a href="http://localhost:5173/campaigns" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Explore Projects</a>
                 </div>
             </div>
         `,
@@ -95,7 +95,7 @@ export const sendCreatorNotification = async (creatorEmail, donorName, amount, c
                     Your project is moving closer to its goal!
                 </p>
                 <div style="margin-top: 30px;">
-                    <a href="${process.env.FRONTEND_URL}/donor-tracking" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Dashboard</a>
+                    <a href="http://localhost:5173/donor-tracking" style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Dashboard</a>
                 </div>
             </div>
         `,
