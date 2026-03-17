@@ -24,9 +24,20 @@ app.use(exp.json({
 }));
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.NODE_ENV === "production" 
-        ? [process.env.FRONTEND_URL] 
-        : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"],
+    origin: (origin, callback) => {
+        if (process.env.NODE_ENV !== "production") {
+            const devOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"];
+            if (!origin || devOrigins.includes(origin)) return callback(null, true);
+        }
+
+        const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(url => url.trim()) : [];
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`⚠️ CORS blocked for origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 
@@ -50,7 +61,7 @@ if (process.env.NODE_ENV === "production") {
     
     app.use(exp.static(path.join(__dirname, "../frontend/dist")));
     
-    app.get("*", (req, res) => {
+    app.get("(.*)", (req, res) => {
         if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
             res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
         }
@@ -59,6 +70,9 @@ if (process.env.NODE_ENV === "production") {
 
 // Health check for deployment
 app.get("/health", (req, res) => res.status(200).send("OK"));
+
+// Redirect root to home
+app.get("/", (req, res) => res.redirect("/home"));
 
 // Start the server
 const port = process.env.PORT || 3000;
