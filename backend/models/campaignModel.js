@@ -38,6 +38,10 @@ const campaignSchema = new Schema(
         status: {
             type: Boolean,
             default: false
+        },
+        imageUrl: {
+            type: String,
+            default: ""
         }
     },
     {

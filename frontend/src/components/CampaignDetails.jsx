@@ -61,120 +61,151 @@ function CampaignDetails() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Dynamic Header */}
-      <div className="bg-amber-300 py-16 lg:py-24 px-6 border-b border-amber-400/20">
-        <div className="container mx-auto max-w-5xl space-y-6">
-          <NavLink to="/campaigns" className="inline-flex items-center gap-2 text-amber-900 font-black uppercase text-xs tracking-widest hover:translate-x-1 transition-transform">
-             <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+      {/* Premium Hero Section */}
+      <div className="relative h-[65vh] lg:h-[75vh] min-h-125 flex items-end">
+        {/* Background Image with Overlays */}
+        <div className="absolute inset-0 overflow-hidden">
+          <img 
+            src={campaign.imageUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2074&auto=format&fit=crop"} 
+            className="w-full h-full object-cover scale-105"
+            alt={campaign.title}
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/40 to-transparent" />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+
+        <div className="container mx-auto max-w-7xl px-8 pb-16 relative z-10">
+          <div className="max-w-4xl space-y-8">
+            <NavLink 
+              to="/campaigns" 
+              className="inline-flex items-center gap-3 px-5 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20 text-white rounded-2xl hover:bg-white/20 transition-all hover:-translate-x-2 group w-fit"
+            >
+              <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-             Back to Exploring
-          </NavLink>
-          <h1 className="text-5xl lg:text-7xl font-black text-gray-900 tracking-tight leading-none max-w-4xl">
-            {campaign.title}
-          </h1>
-          <div className="flex flex-wrap gap-4 pt-4">
-                <div className="px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm text-gray-900 font-bold text-sm">
-                   By {campaign.creator?.firstName} {campaign.creator?.lastName || ''}
-               </div>
-                {isActive && (
-                  <div className="px-4 py-2 rounded-full bg-blue-600 text-white font-black text-sm">
-                    Active Campaign
-                  </div>
-                )}
-                {isPending && (
-                  <div className="px-4 py-2 rounded-full bg-amber-500 text-white font-black text-sm">
-                    Pending Approval
-                  </div>
-                )}
-                {isExpired && campaign.status === true && (
-                  <div className="px-4 py-2 rounded-full bg-gray-500 text-white font-black text-sm">
-                    Campaign Closed
-                  </div>
-                )}
-               {campaign.deadline && (
-                 <div className="px-4 py-2 rounded-full bg-red-50 text-red-600 border border-red-100 font-black text-sm flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Ends on {new Date(campaign.deadline).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+              <span className="text-xs font-black uppercase tracking-widest">Explore Movements</span>
+            </NavLink>
+
+            <div className="space-y-4">
+              <h1 className="text-5xl lg:text-8xl font-black text-white tracking-tighter leading-none uppercase">
+                {campaign.title}
+              </h1>
+              
+              <div className="flex flex-wrap items-center gap-6 pt-4">
+                 <div className="flex items-center gap-4 py-2 px-5 bg-blue-600 rounded-2xl border border-blue-500 shadow-xl shadow-blue-500/20">
+                    <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white font-black text-sm border border-white/20">
+                      {campaign.creator?.firstName?.[0]}
+                    </div>
+                    <span className="text-blue-50 font-black text-sm uppercase tracking-wider">
+                      Movement by {campaign.creator?.firstName} {campaign.creator?.lastName}
+                    </span>
                  </div>
-               )}
+
+                 <div className="flex gap-3">
+                    {isActive && (
+                      <div className="px-5 py-2 bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 text-emerald-400 font-black text-[10px] uppercase tracking-widest rounded-full flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Live Campaign
+                      </div>
+                    )}
+                    {campaign.deadline && (
+                      <div className="px-5 py-2 bg-white/10 backdrop-blur-md border border-white/10 text-white/80 font-black text-[10px] uppercase tracking-widest rounded-full">
+                        Ends {new Date(campaign.deadline).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </div>
+                    )}
+                 </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto max-w-5xl px-6 py-16">
-        <div className="flex flex-col lg:flex-row gap-16">
-          {/* Main Story */}
-          <div className="lg:w-2/3 space-y-10">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-black text-gray-900">The Story</h2>
-              <p className="text-xl text-gray-600 font-medium leading-relaxed whitespace-pre-wrap">
+      <div className="container mx-auto max-w-7xl px-8 py-24">
+        <div className="flex flex-col lg:flex-row gap-20">
+          {/* Main Content Area */}
+          <div className="lg:w-2/3 space-y-20">
+            <div className="space-y-10">
+               <div className="inline-block">
+                  <h2 className="text-sm font-black text-blue-600 uppercase tracking-[0.2em] mb-4">Our Mission</h2>
+                  <div className="h-1.5 w-full bg-blue-600 rounded-full" />
+               </div>
+               <p className="text-2xl lg:text-3xl text-gray-700 font-medium leading-[1.6] whitespace-pre-wrap">
                 {campaign.description}
-              </p>
+               </p>
+            </div>
+
+            {/* Visual Separator */}
+            <div className="grid grid-cols-2 gap-8 py-12 border-y border-gray-100">
+               <div className="space-y-3">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Transparency Level</p>
+                  <p className="text-2xl font-black text-gray-900">Tier 1 Verified</p>
+               </div>
+               <div className="space-y-3">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Support</p>
+                  <p className="text-2xl font-black text-gray-900">0% Platform Fee</p>
+               </div>
             </div>
           </div>
 
-          {/* Sidebar / Funding Box */}
+          {/* Elevated Funding Box */}
           <div className="lg:w-1/3">
-            <div className="sticky top-32 bg-gray-50 border border-gray-100 rounded-4xl p-10 space-y-8 shadow-2xl shadow-gray-200/50">
-              <div className="space-y-2">
-                <p className="text-4xl font-black text-gray-900">₹{campaign.raisedAmount.toLocaleString()}</p>
-                <p className="text-gray-500 font-medium">raised of <span className="font-bold text-gray-700">₹{campaign.goalAmount.toLocaleString()}</span> goal</p>
+            <div className="sticky top-12 bg-white border border-gray-100 rounded-[3rem] p-12 space-y-10 shadow-2xl shadow-blue-500/5">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Total Seeded</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-6xl font-black text-gray-900 tracking-tighter">₹{campaign.raisedAmount.toLocaleString()}</span>
+                  </div>
+                  <p className="text-gray-400 font-bold text-sm">Targeted goal of ₹{campaign.goalAmount.toLocaleString()}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="h-4 w-full bg-gray-50 rounded-full overflow-hidden border border-gray-100">
+                    <div 
+                      className="h-full bg-blue-600 transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(37,99,235,0.4)]"
+                      style={{ width: `${Math.min(progress, 100)}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap gap-4">
+                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{Math.round(progress)}% Progress</span>
+                      <span className="px-3 py-1 bg-gray-50 text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest">{campaign.donations?.length || 0} Backers</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-600 transition-all duration-1000 ease-out shadow-lg shadow-blue-500/20"
-                    style={{ width: `${Math.min(progress, 100)}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs font-black uppercase tracking-wider text-blue-600">
-                  <span>{Math.round(progress)}% Funded</span>
-                  <span>{campaign.donations?.length || 0} Donors</span>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-4 text-center">
+              <div className="space-y-4 pt-4">
                 {authStore.getState().currentUser?.role !== 'ADMIN' ? (
                   <>
                     {isActive ? (
                       <NavLink 
                           to={`/donate/${campaign._id}`}
-                          className="block w-full py-5 bg-gray-900 text-white font-black text-xl rounded-2xl hover:bg-black transition-all hover:-translate-y-1 hover:shadow-2xl shadow-gray-900/10 active:scale-95"
+                          className="group relative block w-full py-6 bg-gray-950 text-white overflow-hidden rounded-4xl hover:bg-black transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
                       >
-                        Donate Now
+                        <div className="relative z-10 flex items-center justify-center gap-3">
+                           <span className="font-black text-lg uppercase tracking-widest">Back this Project</span>
+                           <svg className="w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                           </svg>
+                        </div>
+                        <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 translate-y-full transition-transform group-hover:translate-y-0" />
                       </NavLink>
                     ) : (
-                      <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl">
-                        <p className="text-sm font-bold text-gray-500 italic">
-                          {isPending ? "This campaign is awaiting approval." : "This campaign has ended and is no longer accepting donations."}
+                      <div className="p-8 bg-gray-50 border border-gray-100 rounded-4xl text-center">
+                        <p className="text-sm font-bold text-gray-500">
+                          {isPending ? "Project currently in moderation." : "Journey complete. This campaign is closed."}
                         </p>
                       </div>
                     )}
-                    <p className="text-xs text-gray-400 font-medium pt-2">100% of your donation goes to the cause</p>
+                    <p className="text-[10px] text-gray-400 text-center font-black uppercase tracking-widest pt-4">Direct Contribution • 100% Impact</p>
                   </>
                 ) : (
-                  <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl">
-                    <p className="text-sm font-bold text-blue-600 italic">Administrators are in moderation mode. Donations are restricted to user accounts.</p>
+                  <div className="p-8 bg-blue-50 border border-blue-100 rounded-4xl text-center">
+                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">Admin Mode</p>
+                    <p className="text-sm font-bold text-gray-600 leading-relaxed">Financial interaction restricted for administrative accounts.</p>
                   </div>
                 )}
-              </div>
-
-              <div className="pt-6 border-t border-gray-100 space-y-4">
-                  <h3 className="font-black text-sm uppercase tracking-widest text-gray-400">Impact Stats</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-white rounded-2xl border border-gray-100">
-                          <p className="text-xl font-black text-purple-600">24h</p>
-                          <p className="text-[10px] uppercase font-bold text-gray-400">Response</p>
-                      </div>
-                      <div className="p-4 bg-white rounded-2xl border border-gray-100">
-                          <p className="text-xl font-black text-green-600">Pure</p>
-                          <p className="text-[10px] uppercase font-bold text-gray-400">Transparency</p>
-                      </div>
-                  </div>
               </div>
             </div>
           </div>
@@ -183,13 +214,14 @@ function CampaignDetails() {
         {/* Discover More Section */}
         {allCampaigns.length > 0 && (
           <div className="mt-32 pt-20 border-t border-gray-100 space-y-12">
-            <div className="flex justify-between items-end border-2 border-gray-100 rounded-3xl p-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 overflow-hidden">
               <div className="space-y-2">
-                <h2 className="text-3xl font-black text-gray-900">Discover More Projects</h2>
+                <h2 className="text-3xl font-black text-gray-900 leading-tight">Discover More Projects</h2>
                 <p className="text-gray-500 font-medium">Continue exploring the movements shaping our world.</p>
               </div>
-              <NavLink to="/campaigns" className="text-blue-600 font-black uppercase text-xs tracking-widest hover:underline pb-2">
+              <NavLink to="/campaigns" className="group flex items-center gap-2 text-blue-600 font-black uppercase text-xs tracking-widest hover:text-blue-700 transition-colors pb-1">
                 View All Projects
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </NavLink>
             </div>
 
@@ -200,23 +232,38 @@ function CampaignDetails() {
                   <NavLink 
                     to={`/campaign/${other._id}`} 
                     key={other._id}
-                    className="group bg-gray-200 rounded-4xl border border-gray-100 p-8 space-y-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    className="group bg-white rounded-4xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                   >
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{other.title}</h3>
-                      <p className="text-gray-500 text-sm font-medium line-clamp-2">{other.description}</p>
+                    <div className="relative h-48 bg-gray-100 overflow-hidden">
+                      <img 
+                        src={other.imageUrl || "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=1000"} 
+                        alt={other.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
-                    
-                    <div className="space-y-2">
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-600"
-                          style={{ width: `${Math.min(otherProgress, 100)}%` }}
-                        ></div>
+                    <div className="p-8 space-y-6">
+                      <div className="space-y-3">
+                        <h3 className="text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{other.title}</h3>
+                        <p className="text-gray-500 text-sm font-medium line-clamp-2 leading-relaxed">{other.description}</p>
                       </div>
-                      <p className="text-[10px] font-black uppercase text-blue-600 tracking-wider">
-                        {Math.round(otherProgress)}% Funded
-                      </p>
+                      
+                      <div className="space-y-3">
+                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-600"
+                            style={{ width: `${Math.min(otherProgress, 100)}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-[10px] font-black uppercase text-blue-600 tracking-wider">
+                            {Math.round(otherProgress)}% Funded
+                          </p>
+                          <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider">
+                            ${other.raisedAmount.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </NavLink>
                 );
