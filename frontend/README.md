@@ -26,4 +26,4 @@ frontend
 │   └── index.css
 │
 ├── package.json
-└── vite.config.js
+└── vite.config.js# CrowdFunding_frontend

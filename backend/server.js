@@ -8,6 +8,7 @@ import userApp from "./routes/userApi.js";
 import adminApp from "./routes/AdminApi.js";
 import commonApp from "./routes/commonApp.js";
 import { donationModel } from "./models/donationModel.js";  
+import { initCampaignScheduler } from "./services/scheduler.js";
 
 // create the server
 const app = exp();
@@ -56,11 +57,16 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
+// Health check for deployment
+app.get("/health", (req, res) => res.status(200).send("OK"));
+
 // Start the server
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log("App is listening on Port", port);
-    connection(); // Start DB connection in background
+console.log(`📡 Attempting to start server on port ${port}...`);
+
+app.listen(port, "0.0.0.0", () => {
+    console.log(`✅ App is listening on Port ${port}`);
+    connection().catch(err => console.error("Critical DB failure:", err));
 });
 
 // routes to redirect
