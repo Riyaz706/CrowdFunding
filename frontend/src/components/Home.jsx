@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import heroImg from "../assets/hero-new.png";
 import { NavLink } from "react-router";
 import axios from "axios";
+import { authStore } from "../store/authStore";
 
 function Home() {
+  const { currentUser } = authStore();
   const [stats, setStats] = useState({
     totalRaised: 0,
     totalCampaigns: 0,
@@ -42,12 +44,14 @@ function Home() {
             The world's most trusted crowdfunding platform. Connect with a global community and raise funds for projects that matter.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <NavLink
-              to="/create-campaign"
-              className="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl text-center"
-            >
-              Start a Campaign
-            </NavLink>
+            {currentUser?.role !== 'ADMIN' && (
+              <NavLink
+                to="/create-campaign"
+                className="px-8 py-4 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl text-center"
+              >
+                Start a Campaign
+              </NavLink>
+            )}
             <NavLink
               to="/campaigns"
               className="px-8 py-4 border-2 border-gray-200 text-gray-900 font-bold rounded-xl hover:bg-gray-50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl text-center"
@@ -124,28 +128,30 @@ function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="bg-gray-900 rounded-[3rem] p-12 lg:p-20 text-center text-white space-y-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 blur-[120px] opacity-20"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500 blur-[120px] opacity-20"></div>
-          
-          <h2 className="text-4xl lg:text-6xl font-black max-w-4xl mx-auto leading-tight">
-            Ready to bring your project to life?
-          </h2>
-          <h1 className="text-gray-400 text-xl max-w-2xl mx-auto">
-            Join the community of thousands who have already successfully funded their dreams.
-          </h1>
-          <div className="pt-4">
-            <NavLink
-              to="/register"
-              className="px-12 py-5 bg-white text-gray-900 font-black rounded-2xl hover:bg-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl inline-block"
-            >
-              Get Started for Free
-            </NavLink>
+      {/* Final CTA - Only visible to non-logged in users */}
+      {!currentUser && (
+        <section className="container mx-auto px-6 py-20">
+          <div className="bg-gray-900 rounded-[3rem] p-12 lg:p-20 text-center text-white space-y-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 blur-[120px] opacity-20"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500 blur-[120px] opacity-20"></div>
+            
+            <h2 className="text-4xl lg:text-6xl font-black max-w-4xl mx-auto leading-tight">
+              Ready to bring your project to life?
+            </h2>
+            <h1 className="text-gray-400 text-xl max-w-2xl mx-auto">
+              Join the community of thousands who have already successfully funded their dreams.
+            </h1>
+            <div className="pt-4">
+              <NavLink
+                to="/register"
+                className="px-12 py-5 bg-white text-gray-900 font-black rounded-2xl hover:bg-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl inline-block"
+              >
+                Get Started for Free
+              </NavLink>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
       
       {/* Footer-lite */}
       <footer className="border-t border-gray-100 py-12 text-center text-gray-400 text-sm">

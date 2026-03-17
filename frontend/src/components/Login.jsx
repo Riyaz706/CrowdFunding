@@ -1,32 +1,31 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useNavigate, NavLink } from 'react-router';
 import { authStore } from '../store/authStore';
-
-import { NavLink } from 'react-router';
-import ErrorAlert from './ErrorAlert';
-
 
 function Login() {
   const navigate = useNavigate();
   const { login, loading, error } = authStore();
-  
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
+  // Map backend error messages to the correct field
+  const emailError = error?.toLowerCase().includes('email') ? 'Invalid email' : null;
+  const passwordError = error?.toLowerCase().includes('password') ? 'Invalid password' : null;
+  const generalError = error && !emailError && !passwordError ? error : null;
+
   const onUserLogin = async (data) => {
-    // Add default role if not provided or handle it based on your app logic
-    const loginData = { ...data, role: 'USER' }; 
+    const loginData = { ...data, role: 'USER' };
     await login(loginData);
-    
-    // The store handles the success/error states, but we check here to navigate
+
     const currentState = authStore.getState();
     if (currentState.isAuthenticated) {
       if (currentState.currentUser?.role === 'ADMIN') {
-        navigate('/campaigns');
+        navigate('/admin-approval');
       } else {
         navigate('/home');
       }
@@ -56,9 +55,14 @@ function Login() {
                   message: 'Invalid email address'
                 }
               })}
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-hidden transition-all text-gray-900 font-medium"
+              className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium ${errors.email || emailError ? 'border-red-400' : 'border-gray-100'
+                }`}
             />
-            {errors.email && <p className="text-red-500 text-xs font-bold ml-1">{errors.email.message}</p>}
+            {(errors.email || emailError) && (
+              <p className="text-red-500 text-xs font-bold ml-1">
+                {errors.email?.message || emailError}
+              </p>
+            )}
           </div>
 
           {/* Password */}
@@ -70,17 +74,23 @@ function Login() {
               {...register('password', {
                 required: 'Password is required'
               })}
-              className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-hidden transition-all text-gray-900 font-medium"
+              className={`w-full px-5 py-4 bg-gray-50 border rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 font-medium ${errors.password || passwordError ? 'border-red-400' : 'border-gray-100'
+                }`}
             />
-            {errors.password && <p className="text-red-500 text-xs font-bold ml-1">{errors.password.message}</p>}
+            {(errors.password || passwordError) && (
+              <p className="text-red-500 text-xs font-bold ml-1">
+                {errors.password?.message || passwordError}
+              </p>
+            )}
           </div>
-          <ErrorAlert message={error} />
 
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center">
-              <input type="checkbox" id="remember" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-              <label htmlFor="remember" className="ml-2 text-sm text-gray-500 font-medium">Remember me</label>
-            </div>
+          {/* General backend error (e.g. blocked user) */}
+          {generalError && (
+            <p className="text-red-500 text-sm font-bold text-center">{generalError}</p>
+          )}
+
+          {/* Forgot password link only */}
+          <div className="flex items-center justify-end px-1">
             <a href="#" className="text-sm font-bold text-blue-600 hover:text-blue-500">Forgot password?</a>
           </div>
 
@@ -88,11 +98,10 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-4 rounded-2xl font-black text-white shadow-lg transition-all duration-300 active:scale-[0.98] ${
-              loading 
-                ? 'bg-gray-400 cursor-not-allowed' 
+            className={`w-full py-4 rounded-2xl font-black text-white shadow-lg transition-all duration-300 active:scale-[0.98] ${loading
+                ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-gray-900 hover:bg-gray-800 hover:shadow-gray-900/20 hover:-translate-y-0.5'
-            }`}
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -104,9 +113,9 @@ function Login() {
               </span>
             ) : 'Login'}
           </button>
-          
+
           <p className="text-center text-gray-500 font-medium pt-2">
-            Don't have an account? {' '}
+            Don't have an account?{' '}
             <NavLink to="/register" className="text-blue-600 font-bold hover:underline">Register</NavLink>
           </p>
         </form>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, NavLink } from 'react-router';
 import axios from 'axios';
 import ErrorAlert from './ErrorAlert';
+import { authStore } from '../store/authStore';
 
 
 function CampaignDetails() {
@@ -52,6 +53,10 @@ function CampaignDetails() {
     );
   }
 
+  const isExpired = campaign.deadline && new Date(campaign.deadline) < new Date();
+  const isActive = campaign.status === true && !isExpired;
+  const isPending = campaign.status === false;
+
   const progress = (campaign.raisedAmount / campaign.goalAmount) * 100;
 
   return (
@@ -69,12 +74,24 @@ function CampaignDetails() {
             {campaign.title}
           </h1>
           <div className="flex flex-wrap gap-4 pt-4">
-               <div className="px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm text-gray-900 font-bold text-sm">
-                   By {campaign.creator?.firstName || 'Movement Creator'}
+                <div className="px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm text-gray-900 font-bold text-sm">
+                   By {campaign.creator?.firstName} {campaign.creator?.lastName || ''}
                </div>
-               <div className="px-4 py-2 rounded-full bg-blue-600 text-white font-black text-sm">
-                   Active Campaign
-               </div>
+                {isActive && (
+                  <div className="px-4 py-2 rounded-full bg-blue-600 text-white font-black text-sm">
+                    Active Campaign
+                  </div>
+                )}
+                {isPending && (
+                  <div className="px-4 py-2 rounded-full bg-amber-500 text-white font-black text-sm">
+                    Pending Approval
+                  </div>
+                )}
+                {isExpired && campaign.status === true && (
+                  <div className="px-4 py-2 rounded-full bg-gray-500 text-white font-black text-sm">
+                    Campaign Closed
+                  </div>
+                )}
                {campaign.deadline && (
                  <div className="px-4 py-2 rounded-full bg-red-50 text-red-600 border border-red-100 font-black text-sm flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,13 +138,29 @@ function CampaignDetails() {
               </div>
 
               <div className="space-y-4 pt-4 text-center">
-                <NavLink 
-                    to={`/donate/${campaign._id}`}
-                    className="block w-full py-5 bg-gray-900 text-white font-black text-xl rounded-2xl hover:bg-black transition-all hover:-translate-y-1 hover:shadow-2xl shadow-gray-900/10 active:scale-95"
-                >
-                  Donate Now
-                </NavLink>
-                <p className="text-xs text-gray-400 font-medium">100% of your donation goes to the cause</p>
+                {authStore.getState().currentUser?.role !== 'ADMIN' ? (
+                  <>
+                    {isActive ? (
+                      <NavLink 
+                          to={`/donate/${campaign._id}`}
+                          className="block w-full py-5 bg-gray-900 text-white font-black text-xl rounded-2xl hover:bg-black transition-all hover:-translate-y-1 hover:shadow-2xl shadow-gray-900/10 active:scale-95"
+                      >
+                        Donate Now
+                      </NavLink>
+                    ) : (
+                      <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl">
+                        <p className="text-sm font-bold text-gray-500 italic">
+                          {isPending ? "This campaign is awaiting approval." : "This campaign has ended and is no longer accepting donations."}
+                        </p>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-400 font-medium pt-2">100% of your donation goes to the cause</p>
+                  </>
+                ) : (
+                  <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl">
+                    <p className="text-sm font-bold text-blue-600 italic">Administrators are in moderation mode. Donations are restricted to user accounts.</p>
+                  </div>
+                )}
               </div>
 
               <div className="pt-6 border-t border-gray-100 space-y-4">
@@ -150,7 +183,7 @@ function CampaignDetails() {
         {/* Discover More Section */}
         {allCampaigns.length > 0 && (
           <div className="mt-32 pt-20 border-t border-gray-100 space-y-12">
-            <div className="flex justify-between items-end">
+            <div className="flex justify-between items-end border-2 border-gray-100 rounded-3xl p-4">
               <div className="space-y-2">
                 <h2 className="text-3xl font-black text-gray-900">Discover More Projects</h2>
                 <p className="text-gray-500 font-medium">Continue exploring the movements shaping our world.</p>
@@ -167,7 +200,7 @@ function CampaignDetails() {
                   <NavLink 
                     to={`/campaign/${other._id}`} 
                     key={other._id}
-                    className="group bg-white rounded-4xl border border-gray-100 p-8 space-y-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    className="group bg-gray-200 rounded-4xl border border-gray-100 p-8 space-y-6 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                   >
                     <div className="space-y-3">
                       <h3 className="text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{other.title}</h3>

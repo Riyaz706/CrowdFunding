@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import axios from 'axios';
 import ErrorAlert from './ErrorAlert';
+import { authStore } from '../store/authStore';
 
 function AdminApproval() {
+  const { currentUser } = authStore();
   const [activeTab, setActiveTab] = useState('pending');
   const [pendingCampaigns, setPendingCampaigns] = useState([]);
   const [liveCampaigns, setLiveCampaigns] = useState([]);
@@ -223,7 +225,7 @@ function AdminApproval() {
                                 <div className="space-y-1">
                                     <h3 className="text-2xl font-black text-gray-900">{campaign.title}</h3>
                                     <div className="flex items-center gap-2 text-sm text-gray-400 font-bold uppercase tracking-wider">
-                                        <span>By {campaign.creator?.firstName || 'Unknown'}</span>
+                                        <span>By {campaign.creator?.firstName} {campaign.creator?.lastName || ''}</span>
                                         <span>•</span>
                                         <span>Goal: ₹{(campaign.goalAmount || 0).toLocaleString()}</span>
                                     </div>
@@ -269,7 +271,7 @@ function AdminApproval() {
                     <p className="text-gray-500 font-medium">There are currently no active movements on the platform.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-2">
                     {liveCampaigns.map((campaign) => (
                         <div key={campaign._id} className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
                             <div className="space-y-4 flex-1">
@@ -279,7 +281,7 @@ function AdminApproval() {
                                         <span className="px-3 py-1 bg-green-100 text-green-600 text-[10px] font-black rounded-full uppercase tracking-widest">Active</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-gray-400 font-bold uppercase tracking-wider">
-                                        <span>By {campaign.creator?.firstName}</span>
+                                        <span>By {campaign.creator?.firstName} {campaign.creator?.lastName || ''}</span>
                                         <span>•</span>
                                         <span>Raised: ₹{campaign.raisedAmount?.toLocaleString()}</span>
                                         <span>•</span>
@@ -322,17 +324,17 @@ function AdminApproval() {
                 </div>
             )
         ) : (
-            <div className="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-[2.5rem] border border-gray-800 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100">
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Transaction ID</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Donor</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Campaign</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</th>
-                                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Date</th>
+                            <tr className="bg-gray-600 border-b border-gray-400">
+                                <th className="px-8 py-5 text-[10px] font-black text-gray-100 uppercase tracking-widest">Transaction ID</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-gray-100 uppercase tracking-widest">Donor</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-gray-100 uppercase tracking-widest">Campaign</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-gray-100 uppercase tracking-widest">Amount</th>
+                                <th className="px-6 py-5 text-[10px] font-black text-gray-100 uppercase tracking-widest">Status</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-gray-100 uppercase tracking-widest">Date</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -345,7 +347,7 @@ function AdminApproval() {
                                     </td>
                                     <td className="px-6 py-5 align-middle">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-black text-gray-900">{t.donor?.firstName || 'Anonymous'}</span>
+                                            <span className="text-sm font-black text-gray-900">{t.donor?.firstName} {t.donor?.lastName || ''}</span>
                                             <span className="text-xs text-gray-400">{t.donor?.email}</span>
                                         </div>
                                     </td>
@@ -362,8 +364,9 @@ function AdminApproval() {
                                             {t.paymentStatus}
                                         </span>
                                     </td>
-                                    <td className="px-8 py-5 align-middle text-right">
-                                        <span className="text-xs text-gray-400 font-medium">
+                                    <td className="px-8 py-5 align-middle">
+                                        <span className="text-xs text-gray-900 font-medium text-center">
+                                            {new Date(t.createdAt).toLocaleTimeString()} <br />
                                             {new Date(t.createdAt).toLocaleDateString()}
                                         </span>
                                     </td>

@@ -3,6 +3,7 @@ import { config } from 'dotenv';
 import { campaignModel } from '../models/campaignModel.js';
 import { donationModel } from '../models/donationModel.js';
 import { userModel } from '../models/userModel.js';
+import { sendDonationReceipt, sendCreatorNotification } from '../services/emailService.js';
 config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY?.trim());
@@ -119,6 +120,18 @@ export const handleWebhook = async (req, res) => {
             );
             console.log(`👤 User history updated for: ${userUpdate?.email}`);
 
+            // 4. Send Email Notifications
+            // To Donor
+            sendDonationReceipt(userUpdate.email, amount, campaignUpdate.title)
+                .catch(err => console.error("Receipt email failed:", err));
+            
+            // To Creator (need to find creator email)
+            const creator = await userModel.findById(campaignUpdate.creator);
+            if (creator) {
+                sendCreatorNotification(creator.email, userUpdate.firstName, amount, campaignUpdate.title)
+                    .catch(err => console.error("Creator notification email failed:", err));
+            }
+
             console.log(`✅ Donation of ₹${amount} fully processed.`);
         } catch (dbErr) {
             console.error("❌ Database update failed for successful payment:", dbErr);
@@ -201,6 +214,20 @@ export const verifyPaymentStatus = async (req, res) => {
         await userModel.findByIdAndUpdate(donorId, {
             $addToSet: { donations: donationDoc._id }
         });
+
+        // Send Email Notifications
+        const user = await userModel.findById(donorId);
+        const campaign = await campaignModel.findById(campaignId).populate('creator');
+        
+        if (user && campaign) {
+            sendDonationReceipt(user.email, amount, campaign.title)
+                .catch(err => console.error("Manual receipt fail:", err));
+            
+            if (campaign.creator) {
+                sendCreatorNotification(campaign.creator.email, user.firstName, amount, campaign.title)
+                    .catch(err => console.error("Manual creator alert fail:", err));
+            }
+        }
 
         console.log(`✅ Manual verification successful for ₹${amount}`);
         res.json({ success: true, donation: donationDoc });

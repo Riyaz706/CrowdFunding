@@ -11,9 +11,11 @@ export default commonApp;
 // register user(public)
 commonApp.post("/register",async(req,res,next)=>{
     try {
+        console.log("📝 Registration attempt body:", req.body);
         let newUserDoc = await register(req.body);
         res.status(201).json({message:"user created successfull", payload: newUserDoc});
     } catch (err) {
+        console.error("❌ Registration Error:", err);
         next(err);
     }
 })
@@ -39,7 +41,7 @@ commonApp.post("/login",async(req,res,next)=>{
     }
 })
 
-import { verifyToken } from "../controllers/verifyToken.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 // verify auth (token based)
 commonApp.get("/verify-auth", verifyToken("USER", "ADMIN"), async (req, res) => {

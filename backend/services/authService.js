@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt, { hash } from "bcryptjs";
 import {userModel} from "../models/userModel.js";
 import { config } from "dotenv";
+import { sendWelcomeEmail } from "./emailService.js";
 config()
 
 // register function
@@ -26,6 +27,10 @@ export const register = async(userObj) => {
     const newUserObj =  created.toObject();
     // remove password
     delete newUserObj.password;
+
+    // Send welcome email (async, doesn't block registration)
+    sendWelcomeEmail(newUserObj.email, newUserObj.firstName).catch(err => console.error("Welcome email failed:", err));
+
     // return user obj without password
     return newUserObj
 }

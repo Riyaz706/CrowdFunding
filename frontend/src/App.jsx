@@ -1,5 +1,5 @@
 import './App.css'
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router'
 import Home from './components/Home'
 import AdminApproval from './components/AdminApproval'
 import RootLayout from './components/RootLayout'
@@ -22,6 +22,10 @@ function App() {
       errorElement: <ErrorPage />,
       children: [
         {
+          index: true,
+          element: <Navigate to="/home" replace />
+        },
+        {
           path: '/home',
           element: <Home />
         },
@@ -42,8 +46,8 @@ function App() {
           element: <CampaignDetails />
         },
         {
-          // Protected User Routes (Now also accessible by ADMIN)
-          element: <ProtectedRoute allowedRoles={['USER', 'ADMIN']} />,
+          // Protected User Routes (Only accessible by USER)
+          element: <ProtectedRoute allowedRoles={['USER']} />,
           children: [
             {
               path: '/create-campaign',

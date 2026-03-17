@@ -39,7 +39,10 @@ const connection = async() => {
     }
 }
 
-connection();
+import { initCampaignScheduler } from "./services/scheduler.js";
+connection().then(() => {
+    initCampaignScheduler();
+});
 
 // routes to redirect
 app.use("/user-api",userApp);

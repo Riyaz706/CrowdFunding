@@ -1,7 +1,7 @@
 import exp from "express";
 import { campaignModel } from "../models/campaignModel.js";
 import { userModel } from "../models/userModel.js";
-import { verifyToken } from "../controllers/verifyToken.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 import { donationModel } from "../models/donationModel.js";
 
 const adminApp = exp.Router();
@@ -11,7 +11,7 @@ export default adminApp;
 adminApp.get("/all-donations", verifyToken("ADMIN"), async(req,res)=>{
     try {
         const allDonations = await donationModel.find()
-            .populate('donor', 'firstName email')
+            .populate('donor', 'firstName lastName email')
             .populate('campaign', 'title')
             .sort({ createdAt: -1 });
         
@@ -26,7 +26,7 @@ adminApp.get("/all-donations", verifyToken("ADMIN"), async(req,res)=>{
 
 // access all pending campaigns for approval
 adminApp.get("/pending-campaigns", verifyToken("ADMIN"), async(req,res)=>{
-    let campaignData = await campaignModel.find({status:false}).populate('creator', 'firstName email');
+    let campaignData = await campaignModel.find({status:false}).populate('creator', 'firstName lastName email');
     if(!campaignData || campaignData.length === 0){
         return res.status(200).json({message:"No pending campaigns found", payload: []})
     }
@@ -37,7 +37,7 @@ adminApp.get("/pending-campaigns", verifyToken("ADMIN"), async(req,res)=>{
 adminApp.get("/all-campaigns", verifyToken("ADMIN"), async(req,res)=>{
     try {
         const allCampaigns = await campaignModel.find()
-            .populate('creator', 'firstName email')
+            .populate('creator', 'firstName lastName email')
             .sort({ createdAt: -1 });
         
         return res.status(200).json({

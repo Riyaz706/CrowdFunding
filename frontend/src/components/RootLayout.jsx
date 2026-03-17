@@ -20,9 +20,9 @@ function RootLayout() {
     const navLinkActiveClass = "text-gray-900 font-bold after:w-full";
 
     return (
-        <div className="min-h-screen flex flex-col bg-white">
+        <div className="min-h-screen flex flex-col bg-gray-300">
             {/* Navbar */}
-            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 py-4">
+            <nav className=" top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 py-4">
                 <div className="container mx-auto px-6 flex justify-between items-center">
                     <NavLink to={currentUser?.role === 'ADMIN' ? "/admin-approval" : "/home"} className="flex items-center gap-2 no-underline group">
                         <div className="w-10 h-10 bg-linear-to-tr from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
@@ -44,8 +44,10 @@ function RootLayout() {
                         
                         {isAuthenticated ? (
                             <div className="flex items-center gap-6">
-                                <NavLink to="/donor-tracking" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Track</NavLink>
-                                <span className="text-gray-900 font-bold">Hi, {currentUser?.firstName}</span>
+                                {currentUser?.role !== 'ADMIN' && (
+                                    <NavLink to="/donor-tracking" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Track</NavLink>
+                                )}
+                                <span className="text-gray-900 font-bold">Hi, {currentUser?.firstName} {currentUser?.lastName || ''}</span>
                                 <button 
                                     onClick={handleLogout}
                                     className="px-6 py-2.5 border-2 border-gray-900 text-gray-900 rounded-xl font-bold hover:bg-gray-50 transition-all active:scale-95"

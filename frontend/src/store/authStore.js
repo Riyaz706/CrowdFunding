@@ -7,7 +7,7 @@ export const authStore = create((set, get) => ({
   error: null,
   isAuthenticated: false,
   login: async (userCredWithRole) => {
-    // Note: role is destructured but not used in the common-api/login currently
+
     const { role, ...userCred } = userCredWithRole;
     try {
       set({ loading: true, error: null });
@@ -41,8 +41,8 @@ export const authStore = create((set, get) => ({
         loading: false
       });
     } catch (error) {
-      // Only reset if it's a definitive auth failure (401/403)
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      // 400 = no token (guest), 401/403 = invalid/expired/forbidden token
+      if (error.response?.status === 400 || error.response?.status === 401 || error.response?.status === 403) {
         set({
           isAuthenticated: false,
           currentUser: null,

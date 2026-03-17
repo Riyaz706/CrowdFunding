@@ -12,12 +12,20 @@ function DonorTracking() {
   const [error, setError] = useState(null);
   const [expandedCampaign, setExpandedCampaign] = useState(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [donationType, setDonationType] = useState('sent'); // 'sent' or 'received'
 
-  const fetchData = async (tab) => {
+  const fetchData = async (tab, type = donationType) => {
     try {
       setLoading(true);
       setError(null);
-      const endpoint = tab === 'campaigns' ? 'my-campaigns' : 'my-donations';
+      
+      let endpoint;
+      if (tab === 'campaigns') {
+        endpoint = 'my-campaigns';
+      } else {
+        endpoint = type === 'sent' ? 'my-donations' : 'received-donations';
+      }
+
       const response = await axios.get(`http://localhost:3000/user-api/${endpoint}`, {
         withCredentials: true
       });
@@ -56,11 +64,11 @@ function DonorTracking() {
           console.error("❌ Verification fallback failed:", err);
         }
       }
-      fetchData(activeTab);
+      fetchData(activeTab, donationType);
     };
 
     verifyAndFetch();
-  }, [activeTab]);
+  }, [activeTab, donationType]);
 
   const TabButton = ({ id, label, icon }) => (
     <button
@@ -95,6 +103,27 @@ function DonorTracking() {
                 <TabButton id="donations" label="My Donations" icon="💝" />
             </div>
         </div>
+
+        {activeTab === 'donations' && (
+            <div className="flex bg-white/50 backdrop-blur-sm p-1.5 rounded-[2rem] border border-gray-100 w-fit mb-12 animate-in fade-in slide-in-from-left-4">
+                <button 
+                    onClick={() => setDonationType('sent')}
+                    className={`px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                        donationType === 'sent' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                    Sent Donations
+                </button>
+                <button 
+                    onClick={() => setDonationType('received')}
+                    className={`px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                        donationType === 'received' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                    Received Donations
+                </button>
+            </div>
+        )}
 
         {showSuccessToast && (
             <div className="mb-8 p-6 bg-green-50 border-2 border-green-100 rounded-3xl flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
@@ -131,14 +160,29 @@ function DonorTracking() {
                     </>
                 ) : (
                     <>
-                        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
-                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Amount Contributed</p>
-                            <p className="text-4xl font-black text-gray-900">₹{(summary.totalDonated || 0).toLocaleString()}</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
-                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Movements Supported</p>
-                            <p className="text-4xl font-black text-pink-600">{summary.totalDonationsMade || 0}</p>
-                        </div>
+                        {donationType === 'sent' ? (
+                            <>
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Amount Contributed</p>
+                                    <p className="text-4xl font-black text-gray-900">₹{(summary.totalDonated || 0).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Movements Supported</p>
+                                    <p className="text-4xl font-black text-pink-600">{summary.totalDonationsMade || 0}</p>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Funds Received</p>
+                                    <p className="text-4xl font-black text-gray-900">₹{(summary.totalReceived || 0).toLocaleString()}</p>
+                                </div>
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
+                                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Campaign Contributions</p>
+                                    <p className="text-4xl font-black text-blue-600">{summary.totalDonationsCount || 0}</p>
+                                </div>
+                            </>
+                        )}
                     </>
                 )}
             </div>
@@ -210,7 +254,7 @@ function DonorTracking() {
                                             className={`flex-1 lg:flex-none px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border-2 ${
                                                 expandedCampaign === campaign._id 
                                                 ? 'border-blue-600 bg-blue-50 text-blue-600' 
-                                                : 'border-gray-100 text-gray-400 hover:border-gray-200'
+                                                : 'border-gray-700 text-black-400 hover:bg-white-200'
                                             }`}
                                         >
                                             {expandedCampaign === campaign._id ? 'Hide Donors' : 'View Donors'}
@@ -223,8 +267,8 @@ function DonorTracking() {
                                         </NavLink>
                                         <span className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 flex items-center justify-center ${
                                             campaign.status 
-                                            ? 'bg-green-50 text-green-600 border-green-100' 
-                                            : 'bg-amber-50 text-amber-600 border-amber-100'
+                                            ? 'bg-green-600 text-white border-green-100' 
+                                            : 'bg-amber-600 text-white border-amber-100'
                                         }`}>
                                             {campaign.status ? 'Live' : 'Pending'}
                                         </span>
@@ -240,7 +284,7 @@ function DonorTracking() {
                                                 {campaign.donations.map((donation, idx) => (
                                                     <div key={idx} className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-md transition-all">
                                                         <div className="space-y-1">
-                                                            <p className="text-sm font-black text-gray-900">{donation.donor?.firstName || 'Anonymous'}</p>
+                                                            <p className="text-sm font-black text-gray-900">{donation.donor?.firstName} {donation.donor?.lastName || ''}</p>
                                                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                                                                 {new Date(donation.createdAt).toLocaleDateString()}
                                                             </p>
@@ -263,30 +307,44 @@ function DonorTracking() {
                 ) : (
                     <div className="bg-white rounded-4xl overflow-hidden border border-gray-100 divide-y divide-gray-50">
                         <div className="grid grid-cols-4 px-8 py-6 bg-gray-50/50 text-xs font-black uppercase tracking-widest text-gray-400">
-                            <span>Movement</span>
-                            <span>Date</span>
+                            <span>{donationType === 'sent' ? 'Recipient Movement' : 'From Donor'}</span>
+                            <span>{donationType === 'sent' ? 'Date' : 'Project'}</span>
                             <span>Amount</span>
-                            <span className="text-right">Status</span>
+                            <span className="text-right">Date</span>
                         </div>
                         {data.map((donation) => (
                             <div key={donation._id} className="grid grid-cols-4 px-8 py-8 items-center hover:bg-gray-50/30 transition-colors">
-                                <NavLink to={`/campaign/${donation.campaign?._id}`} className="font-black text-gray-900 hover:text-blue-600 transition-colors truncate pr-4">
-                                    {donation.campaign?.title || 'Unknown Project'}
+                                <NavLink to={`/campaign/${donation.campaign?._id}`} className="font-black text-gray-900 hover:text-blue-600 transition-colors pr-4">
+                                    {donationType === 'sent' ? (
+                                        donation.campaign?.title || 'Unknown Project'
+                                    ) : (
+                                        `${donation.donor?.firstName} ${donation.donor?.lastName || ''}`
+                                    )}
                                 </NavLink>
                                 <span className="text-gray-500 font-bold text-sm">
-                                    {new Date(donation.createdAt).toLocaleDateString()}
+                                    {donationType === 'sent' ? (
+                                        new Date(donation.createdAt).toLocaleDateString()
+                                    ) : (
+                                        donation.campaign?.title || 'Private Project'
+                                    )}
                                 </span>
                                 <span className="text-gray-900 font-black text-lg">
                                     ₹{(donation.amount || 0).toLocaleString()}
                                 </span>
                                 <div className="text-right">
-                                    <span className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest border ${
-                                        donation.paymentStatus === 'success'
-                                            ? 'bg-green-50 text-green-600 border-green-100'
-                                            : 'bg-red-50 text-red-600 border-red-100'
-                                    }`}>
-                                        {donation.paymentStatus}
-                                    </span>
+                                    {donationType === 'sent' ? (
+                                        <span className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest border ${
+                                            donation.paymentStatus === 'success'
+                                                ? 'bg-green-50 text-green-600 border-green-100'
+                                                : 'bg-red-50 text-red-600 border-red-100'
+                                        }`}>
+                                            {donation.paymentStatus}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400 font-bold text-xs">
+                                            {new Date(donation.createdAt).toLocaleDateString()}
+                                        </span>
+                                    )}
                                 </div>
                                 {donation.description && (
                                     <div className="col-span-4 mt-4 px-6 py-4 bg-blue-50/50 rounded-2xl">

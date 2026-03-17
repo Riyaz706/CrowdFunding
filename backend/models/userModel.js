@@ -5,7 +5,7 @@ const userSchema = new Schema({
     firstName: {
         type: String,
         required: [true, "First name is required"],
-        minLength: [4, "First name should be at least 4 characters long"]
+        minLength: [2, "First name should be at least 2 characters long"]
     },
     lastName: {
         type: String

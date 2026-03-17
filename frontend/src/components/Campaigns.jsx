@@ -13,10 +13,18 @@ function Campaigns() {
     const fetchCampaigns = async () => {
       try {
         const response = await axios.get('http://localhost:3000/user-api/campaigns');
-        setCampaigns(response.data.payload);
+        // Ensure payload exists or default to empty array
+        setCampaigns(response.data.payload || []);
+        setError(null); // Clear any previous errors
       } catch (err) {
-        console.error('Error fetching campaigns:', err);
-        setError('Failed to load campaigns. Please try again later.');
+        // If the backend returns 404 for "no campaigns", don't show the error alert
+        if (err.response?.status === 404) {
+          setCampaigns([]);
+          setError(null);
+        } else {
+          console.error('Error fetching campaigns:', err);
+          setError('Failed to load campaigns. Please try again later.');
+        }
       } finally {
         setLoading(false);
       }
@@ -43,16 +51,18 @@ function Campaigns() {
           </p>
         </div>
 
-        <div className="max-w-md mx-auto mb-10">
-          <ErrorAlert message={error} />
-        </div>
+        {error && (
+          <div className="max-w-md mx-auto mb-10">
+            <ErrorAlert message={error} />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {campaigns.map((campaign) => {
+          {!error && campaigns.length > 0 && campaigns.map((campaign) => {
             const progress = (campaign.raisedAmount / campaign.goalAmount) * 100;
             return (
-              <NavLink 
-                to={`/campaign/${campaign._id}`} 
+              <NavLink
+                to={`/campaign/${campaign._id}`}
                 key={campaign._id}
                 className="group bg-white rounded-4xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-500 hover:-translate-y-2 flex flex-col"
               >
@@ -60,21 +70,21 @@ function Campaigns() {
                 <div className="p-8 flex-1 flex flex-col space-y-6">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
-                       <h3 className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 flex-1">
-                         {campaign.title}
-                       </h3>
-                       {campaign.deadline && (
-                         <div className="ml-4 px-3 py-1 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-red-100 whitespace-nowrap">
-                           Deadline
-                         </div>
-                       )}
+                      <h3 className="text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 flex-1">
+                        {campaign.title}
+                      </h3>
+                      {campaign.deadline && (
+                        <div className="ml-4 px-1 py-1 bg-red-50 text-red-600 text-[8px] font-black uppercase tracking-widest rounded-full border border-red-100 whitespace-nowrap">
+                          Ends on {new Date(campaign.deadline).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </div>
+                      )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
-                       <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500">
-                          {campaign.creator?.firstName?.[0] || 'C'}
-                       </div>
-                       <p className="text-xs font-bold text-gray-400">By {campaign.creator?.firstName || 'Movement Creator'}</p>
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-900">
+                        {campaign.creator?.firstName?.[0] || 'C'}
+                      </div>
+                      <p className="text-xs font-bold text-gray-900">By {campaign.creator?.firstName} {campaign.creator?.lastName || 'Movement Creator'}</p>
                     </div>
 
                     <p className="text-gray-500 font-medium line-clamp-3 text-sm leading-relaxed">
@@ -96,12 +106,12 @@ function Campaigns() {
                     </div>
 
                     <div className="h-3 w-full bg-white/50 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-blue-600 transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(progress, 100)}%` }}
                       ></div>
                     </div>
-                    
+
                     <p className="text-xs font-black text-blue-600 text-right uppercase tracking-wider">
                       {Math.round(progress)}% Funded
                     </p>
