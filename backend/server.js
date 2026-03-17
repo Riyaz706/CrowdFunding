@@ -17,6 +17,7 @@ app.use(exp.json({
     verify: (req, res, buf) => {
         if (req.originalUrl?.includes('/webhook')) {
             req.rawBody = buf;
+            console.log(`📦 Captured rawBody for: ${req.originalUrl} (${buf.length} bytes)`);
         }
     }
 }));

@@ -1,6 +1,6 @@
 import exp from "express";
 import { campaignModel } from "../models/campaignModel.js";
-import { createPaymentIntent, handleWebhook } from "../Controllers/paymentController.js";
+import { createPaymentIntent, handleWebhook, verifyPaymentStatus } from "../Controllers/paymentController.js";
 import { verifyToken } from "../controllers/verifyToken.js";
 import { donationModel } from "../models/donationModel.js";
 
@@ -46,6 +46,8 @@ userApp.post("/create-campaign", verifyToken("USER"), async (req, res) => {
 // Protected route: user must be logged in to donate(Frontend requests the payment intent)
 userApp.post("/create-payment-intent", verifyToken("USER"), createPaymentIntent);
 
+// Protected route: user must be logged in to verify payment status
+userApp.get("/verify-payment/:paymentIntentId", verifyToken("USER"), verifyPaymentStatus);
 
 // Stripe hits this endpoint when the payment succeeds
 // Note: express.raw() is critical for signature verification

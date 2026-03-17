@@ -29,7 +29,33 @@ function DonorTracking() {
   };
 
   useEffect(() => {
-    fetchData(activeTab);
+    const query = new URLSearchParams(window.location.search);
+    const paymentIntent = query.get('payment_intent');
+    const redirectStatus = query.get('redirect_status');
+
+    const verifyAndFetch = async () => {
+      if (paymentIntent && redirectStatus === 'succeeded') {
+        try {
+          // Avoid re-verifying if we've already done it in this session
+          const processed = sessionStorage.getItem(`processed_${paymentIntent}`);
+          if (!processed) {
+            setActiveTab('donations');
+            await axios.get(`http://localhost:3000/user-api/verify-payment/${paymentIntent}`, {
+               withCredentials: true
+            });
+            console.log("✅ Payment verified successfully");
+            sessionStorage.setItem(`processed_${paymentIntent}`, 'true');
+            // Clean URL to prevent re-triggering on refresh
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        } catch (err) {
+          console.error("❌ Verification fallback failed:", err);
+        }
+      }
+      fetchData(activeTab);
+    };
+
+    verifyAndFetch();
   }, [activeTab]);
 
   const TabButton = ({ id, label, icon }) => (
@@ -73,26 +99,26 @@ function DonorTracking() {
                     <>
                         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Funds Raised</p>
-                            <p className="text-4xl font-black text-gray-900">₹{summary.totalRaised.toLocaleString()}</p>
+                            <p className="text-4xl font-black text-gray-900">₹{(summary.totalRaised || 0).toLocaleString()}</p>
                         </div>
                         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Donors</p>
-                            <p className="text-4xl font-black text-blue-600">{summary.totalDonationsReceived}</p>
+                            <p className="text-4xl font-black text-blue-600">{summary.totalDonationsReceived || 0}</p>
                         </div>
                         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Live Campaigns</p>
-                            <p className="text-4xl font-black text-purple-600">{summary.totalCampaigns}</p>
+                            <p className="text-4xl font-black text-purple-600">{summary.totalCampaigns || 0}</p>
                         </div>
                     </>
                 ) : (
                     <>
                         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Amount Contributed</p>
-                            <p className="text-4xl font-black text-gray-900">₹{summary.totalDonated.toLocaleString()}</p>
+                            <p className="text-4xl font-black text-gray-900">₹{(summary.totalDonated || 0).toLocaleString()}</p>
                         </div>
                         <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col justify-center">
                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Movements Supported</p>
-                            <p className="text-4xl font-black text-pink-600">{summary.totalDonationsMade}</p>
+                            <p className="text-4xl font-black text-pink-600">{summary.totalDonationsMade || 0}</p>
                         </div>
                     </>
                 )}
@@ -145,11 +171,11 @@ function DonorTracking() {
                                     <div className="flex gap-10">
                                         <div>
                                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Raised</p>
-                                            <p className="text-xl font-black text-gray-900">₹{campaign.raisedAmount.toLocaleString()}</p>
+                                            <p className="text-xl font-black text-gray-900">₹{(campaign.raisedAmount || 0).toLocaleString()}</p>
                                         </div>
                                         <div>
                                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Goal</p>
-                                            <p className="text-xl font-black text-gray-900">₹{campaign.goalAmount.toLocaleString()}</p>
+                                            <p className="text-xl font-black text-gray-900">₹{(campaign.goalAmount || 0).toLocaleString()}</p>
                                         </div>
                                         <div>
                                             <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Donors</p>
@@ -194,7 +220,7 @@ function DonorTracking() {
                                     {new Date(donation.createdAt).toLocaleDateString()}
                                 </span>
                                 <span className="text-gray-900 font-black text-lg">
-                                    ₹{donation.amount.toLocaleString()}
+                                    ₹{(donation.amount || 0).toLocaleString()}
                                 </span>
                                 <div className="text-right">
                                     <span className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest border ${
