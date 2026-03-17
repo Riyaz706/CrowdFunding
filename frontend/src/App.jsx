@@ -42,8 +42,8 @@ function App() {
           element: <CampaignDetails />
         },
         {
-          // Protected User Routes
-          element: <ProtectedRoute allowedRoles={['USER']} />,
+          // Protected User Routes (Now also accessible by ADMIN)
+          element: <ProtectedRoute allowedRoles={['USER', 'ADMIN']} />,
           children: [
             {
               path: '/create-campaign',

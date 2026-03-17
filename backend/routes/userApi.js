@@ -17,7 +17,7 @@ userApp.get("/campaigns",async(req,res)=>{
 })
 
 // create campaign(protected)
-userApp.post("/create-campaign", verifyToken("USER"), async (req, res) => {
+userApp.post("/create-campaign", verifyToken("USER", "ADMIN"), async (req, res) => {
     try {
         // Automatically set the creator from the authenticated user token
         const campaignData = {
@@ -44,10 +44,10 @@ userApp.post("/create-campaign", verifyToken("USER"), async (req, res) => {
 
 
 // Protected route: user must be logged in to donate(Frontend requests the payment intent)
-userApp.post("/create-payment-intent", verifyToken("USER"), createPaymentIntent);
+userApp.post("/create-payment-intent", verifyToken("USER", "ADMIN"), createPaymentIntent);
 
 // Protected route: user must be logged in to verify payment status
-userApp.get("/verify-payment/:paymentIntentId", verifyToken("USER"), verifyPaymentStatus);
+userApp.get("/verify-payment/:paymentIntentId", verifyToken("USER", "ADMIN"), verifyPaymentStatus);
 
 // Stripe hits this endpoint when the payment succeeds
 // Note: express.raw() is critical for signature verification
@@ -67,7 +67,7 @@ userApp.get("/campaign/:id", async (req, res) => {
     });
 });
 // route to get the details of donors of a campaign by id
-userApp.get("/campaign-history/:campaignId",verifyToken("USER"),async(req,res)=>{
+userApp.get("/campaign-history/:campaignId",verifyToken("USER", "ADMIN"),async(req,res)=>{
     let campaignId = req.params.campaignId;
     const donorsDoc = await campaignModel
             .findOne({ _id: campaignId, status: true })
@@ -85,10 +85,15 @@ userApp.get("/campaign-history/:campaignId",verifyToken("USER"),async(req,res)=>
 })
 
 // route to get campaigns created by the logged-in user
-userApp.get("/my-campaigns", verifyToken("USER"), async (req, res) => {
+userApp.get("/my-campaigns", verifyToken("USER", "ADMIN"), async (req, res) => {
     try {
         const userId = req.user.userId;
-        const myCampaigns = await campaignModel.find({ creator: userId }).sort({ createdAt: -1 });
+        const myCampaigns = await campaignModel.find({ creator: userId })
+            .populate({
+                path: 'donations',
+                populate: { path: 'donor', select: 'firstName email' }
+            })
+            .sort({ createdAt: -1 });
         
         // Calculate summaries
         const totalRaised = myCampaigns.reduce((acc, c) => acc + (c.raisedAmount || 0), 0);
@@ -109,7 +114,7 @@ userApp.get("/my-campaigns", verifyToken("USER"), async (req, res) => {
 });
 
 // route to get donations made by the logged-in user
-userApp.get("/my-donations", verifyToken("USER"), async (req, res) => {
+userApp.get("/my-donations", verifyToken("USER", "ADMIN"), async (req, res) => {
     try {
         const userId = req.user.userId;
         const myDonations = await donationModel.find({ donor: userId })

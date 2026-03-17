@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { NavLink } from 'react-router';
 import ErrorAlert from './ErrorAlert';
+import ProgressBar from './ProgressBar';
 
 function DonorTracking() {
   const [activeTab, setActiveTab] = useState('campaigns'); // 'campaigns' or 'donations'
@@ -9,6 +10,8 @@ function DonorTracking() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedCampaign, setExpandedCampaign] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const fetchData = async (tab) => {
     try {
@@ -44,6 +47,7 @@ function DonorTracking() {
                withCredentials: true
             });
             console.log("✅ Payment verified successfully");
+            setShowSuccessToast(true);
             sessionStorage.setItem(`processed_${paymentIntent}`, 'true');
             // Clean URL to prevent re-triggering on refresh
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -91,6 +95,21 @@ function DonorTracking() {
                 <TabButton id="donations" label="My Donations" icon="💝" />
             </div>
         </div>
+
+        {showSuccessToast && (
+            <div className="mb-8 p-6 bg-green-50 border-2 border-green-100 rounded-3xl flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl shadow-lg shadow-green-100">
+                        ✓
+                    </div>
+                    <div>
+                        <h3 className="font-black text-gray-900">Payment Successful!</h3>
+                        <p className="text-gray-500 text-sm font-medium">Thank you for your generous contribution to this movement.</p>
+                    </div>
+                </div>
+                <button onClick={() => setShowSuccessToast(false)} className="text-gray-400 hover:text-gray-600 font-bold px-4 py-2">Dismiss</button>
+            </div>
+        )}
 
         {/* Stats Overview */}
         {summary && (
@@ -151,55 +170,93 @@ function DonorTracking() {
                     data.map((campaign) => {
                         const progress = (campaign.raisedAmount / campaign.goalAmount) * 100;
                         return (
-                            <div key={campaign._id} className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all flex flex-col lg:flex-row gap-8 items-center">
-                                <div className="flex-1 space-y-4 w-full">
-                                    <div className="flex justify-between items-start">
+                            <div key={campaign._id} className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all">
+                                <div className="flex flex-col lg:flex-row gap-8 items-center justify-between">
+                                    <div className="flex-1 space-y-4 w-full">
                                         <div className="space-y-1">
                                             <h3 className="text-2xl font-black text-gray-900">{campaign.title}</h3>
                                             <p className="text-gray-400 font-bold uppercase text-xs tracking-widest">
                                                 Created on {new Date(campaign.createdAt).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <div className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase tracking-widest border ${
+                                        <div className="flex gap-10">
+                                            <div>
+                                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Raised</p>
+                                                <p className="text-xl font-black text-gray-900">₹{(campaign.raisedAmount || 0).toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Goal</p>
+                                                <p className="text-xl font-black text-gray-900">₹{(campaign.goalAmount || 0).toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Donors</p>
+                                                <p className="text-xl font-black text-blue-600">{campaign.donations?.length || 0}</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <ProgressBar 
+                                                progress={progress} 
+                                                color="bg-blue-600"
+                                            />
+                                            <p className="text-xs font-black text-blue-600 text-right uppercase tracking-wider">
+                                                {Math.round(progress)}% Funded
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex gap-4 w-full lg:w-auto">
+                                        <button 
+                                            onClick={() => setExpandedCampaign(expandedCampaign === campaign._id ? null : campaign._id)}
+                                            className={`flex-1 lg:flex-none px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border-2 ${
+                                                expandedCampaign === campaign._id 
+                                                ? 'border-blue-600 bg-blue-50 text-blue-600' 
+                                                : 'border-gray-100 text-gray-400 hover:border-gray-200'
+                                            }`}
+                                        >
+                                            {expandedCampaign === campaign._id ? 'Hide Donors' : 'View Donors'}
+                                        </button>
+                                        <NavLink 
+                                            to={`/campaign/${campaign._id}`}
+                                            className="flex-1 lg:flex-none px-8 py-3 border-2 border-gray-900 text-gray-900 font-black rounded-2xl hover:bg-gray-900 hover:text-white transition-all text-center text-xs uppercase tracking-widest"
+                                        >
+                                            View Page
+                                        </NavLink>
+                                        <span className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border-2 flex items-center justify-center ${
                                             campaign.status 
-                                                ? 'bg-green-50 text-green-600 border-green-100' 
-                                                : 'bg-amber-50 text-amber-600 border-amber-100'
+                                            ? 'bg-green-50 text-green-600 border-green-100' 
+                                            : 'bg-amber-50 text-amber-600 border-amber-100'
                                         }`}>
-                                            {campaign.status ? '● Active' : '● Review Pending'}
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-10">
-                                        <div>
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Raised</p>
-                                            <p className="text-xl font-black text-gray-900">₹{(campaign.raisedAmount || 0).toLocaleString()}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Goal</p>
-                                            <p className="text-xl font-black text-gray-900">₹{(campaign.goalAmount || 0).toLocaleString()}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Donors</p>
-                                            <p className="text-xl font-black text-gray-900">{campaign.donations?.length || 0}</p>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full bg-blue-600 transition-all duration-1000"
-                                                style={{ width: `${Math.min(progress, 100)}%` }}
-                                            ></div>
-                                        </div>
-                                        <p className="text-xs font-black text-blue-600 text-right uppercase tracking-wider">
-                                            {Math.round(progress)}% Funded
-                                        </p>
+                                            {campaign.status ? 'Live' : 'Pending'}
+                                        </span>
                                     </div>
                                 </div>
-                                <NavLink 
-                                    to={`/campaign/${campaign._id}`}
-                                    className="w-full lg:w-auto px-8 py-5 border-2 border-gray-900 text-gray-900 font-black rounded-2xl hover:bg-gray-900 hover:text-white transition-all text-center"
-                                >
-                                    Manage Details
-                                </NavLink>
+
+                                {/* Expanded Donors */}
+                                {expandedCampaign === campaign._id && (
+                                    <div className="mt-8 pt-8 border-t border-gray-50 space-y-4">
+                                        <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest">Recent Contributions</h4>
+                                        {campaign.donations && campaign.donations.length > 0 ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {campaign.donations.map((donation, idx) => (
+                                                    <div key={idx} className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-md transition-all">
+                                                        <div className="space-y-1">
+                                                            <p className="text-sm font-black text-gray-900">{donation.donor?.firstName || 'Anonymous'}</p>
+                                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                                                {new Date(donation.createdAt).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-lg font-black text-blue-600">₹{donation.amount?.toLocaleString()}</p>
+                                                            <span className="text-[8px] font-black text-green-600 uppercase tracking-tighter">SUCCESS</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-400 font-medium py-4 italic">No donations received yet.</p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )
                     })

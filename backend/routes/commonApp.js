@@ -43,7 +43,20 @@ import { verifyToken } from "../controllers/verifyToken.js";
 
 // verify auth (token based)
 commonApp.get("/verify-auth", verifyToken("USER", "ADMIN"), async (req, res) => {
-    res.status(200).json({ message: "Authenticated", payload: req.user });
+    try {
+        const user = await userModel.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if (!user.isActive) {
+            return res.status(403).json({ message: "User is blocked" });
+        }
+        const userObj = user.toObject();
+        delete userObj.password;
+        res.status(200).json({ message: "Authenticated", payload: userObj });
+    } catch (error) {
+        res.status(500).json({ message: "Auth verification failed", error: error.message });
+    }
 });
 
 // Global Stats
@@ -70,13 +83,13 @@ commonApp.get("/stats", async (req, res) => {
     }
 });
 
-// logout
-commonApp.post("/logout",async(req,res)=> {
-    res.clearCookie("token",{
-        httpOnly:true,
-        secure:false,
-        sameSite:"lax",
-        
+// logout (allow both GET and POST for convenience)
+commonApp.all("/logout", async (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false, // Set to true if using HTTPS
+        sameSite: "lax",
+        path: '/'
     });
-    res.status(200).json({message:"logout successful"});
-})
+    res.status(200).json({ message: "logout successful" });
+});

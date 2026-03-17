@@ -70,7 +70,7 @@ function CampaignDetails() {
           </h1>
           <div className="flex flex-wrap gap-4 pt-4">
                <div className="px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm text-gray-900 font-bold text-sm">
-                   By {campaign.creator?.firstName || 'Community Member'}
+                   By {campaign.creator?.firstName || 'Movement Creator'}
                </div>
                <div className="px-4 py-2 rounded-full bg-blue-600 text-white font-black text-sm">
                    Active Campaign

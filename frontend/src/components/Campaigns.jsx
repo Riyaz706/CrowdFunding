@@ -74,7 +74,7 @@ function Campaigns() {
                        <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500">
                           {campaign.creator?.firstName?.[0] || 'C'}
                        </div>
-                       <p className="text-xs font-bold text-gray-400">By {campaign.creator?.firstName || 'Community Member'}</p>
+                       <p className="text-xs font-bold text-gray-400">By {campaign.creator?.firstName || 'Movement Creator'}</p>
                     </div>
 
                     <p className="text-gray-500 font-medium line-clamp-3 text-sm leading-relaxed">

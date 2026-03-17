@@ -25,10 +25,11 @@ function Login() {
     // The store handles the success/error states, but we check here to navigate
     const currentState = authStore.getState();
     if (currentState.isAuthenticated) {
-      // toast.success('Welcome back!');
-      navigate('/home');
-    } else if (currentState.error) {
-      // toast.error(currentState.error);
+      if (currentState.currentUser?.role === 'ADMIN') {
+        navigate('/campaigns');
+      } else {
+        navigate('/home');
+      }
     }
   };
 

@@ -58,7 +58,8 @@ export const authentication = async({email,password}) => {
         {
             userId:user._id,
             email:user.email,
-            role:user.role
+            role:user.role,
+            firstName: user.firstName
         },
         process.env.JWT_SECRET,
         {

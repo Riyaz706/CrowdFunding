@@ -2,9 +2,27 @@ import exp from "express";
 import { campaignModel } from "../models/campaignModel.js";
 import { userModel } from "../models/userModel.js";
 import { verifyToken } from "../controllers/verifyToken.js";
+import { donationModel } from "../models/donationModel.js";
 
 const adminApp = exp.Router();
 export default adminApp;
+
+// access all donations on the platform
+adminApp.get("/all-donations", verifyToken("ADMIN"), async(req,res)=>{
+    try {
+        const allDonations = await donationModel.find()
+            .populate('donor', 'firstName email')
+            .populate('campaign', 'title')
+            .sort({ createdAt: -1 });
+        
+        return res.status(200).json({
+            message: "Global transaction history loaded",
+            payload: allDonations
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to load transactions", error: error.message });
+    }
+});
 
 // access all pending campaigns for approval
 adminApp.get("/pending-campaigns", verifyToken("ADMIN"), async(req,res)=>{
@@ -15,14 +33,45 @@ adminApp.get("/pending-campaigns", verifyToken("ADMIN"), async(req,res)=>{
     return res.status(200).json({message:"Pending campaigns loaded successfully", payload: campaignData});
 })
 
-// publish or unpublish campaigns by id(protected)
-adminApp.put("/campaign/:campaignId",verifyToken("ADMIN"),async(req,res)=>{
-    let campaignId = req.params.campaignId;
-    let campaignDoc = await campaignModel.findOneAndUpdate({_id:campaignId},{$set:{status:req.body.status}},{new:true});
-    if(!campaignDoc){
-        return res.status(404).json({message:"campaign not found"});
+// access all campaigns regardless of status
+adminApp.get("/all-campaigns", verifyToken("ADMIN"), async(req,res)=>{
+    try {
+        const allCampaigns = await campaignModel.find()
+            .populate('creator', 'firstName email')
+            .sort({ createdAt: -1 });
+        
+        return res.status(200).json({
+            message: "All campaigns loaded successfully",
+            payload: allCampaigns
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to load campaigns", error: error.message });
     }
-    return res.status(201).json({message:"campaign published successfully",payload:campaignDoc});
+});
+
+// update campaign by id (full edit and status toggle)
+adminApp.put("/campaign/:campaignId", verifyToken("ADMIN"), async(req,res)=>{
+    try {
+        const campaignId = req.params.campaignId;
+        const updateData = { ...req.body };
+        
+        const campaignDoc = await campaignModel.findByIdAndUpdate(
+            campaignId,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        
+        if(!campaignDoc){
+            return res.status(404).json({message:"Campaign not found"});
+        }
+        
+        return res.status(201).json({
+            message: "Campaign updated successfully",
+            payload: campaignDoc
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to update campaign", error: error.message });
+    }
 })
 
 
