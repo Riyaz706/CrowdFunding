@@ -61,7 +61,7 @@ if (process.env.NODE_ENV === "production") {
     
     app.use(exp.static(path.join(__dirname, "../frontend/dist")));
     
-    app.get("(.*)", (req, res) => {
+    app.get(/.*/, (req, res) => {
         if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
             res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
         }
