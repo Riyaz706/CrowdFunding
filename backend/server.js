@@ -27,7 +27,13 @@ app.use(cors({
     origin: (origin, callback) => {
         const devOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"];
         const rawProdOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
-        const prodOrigins = rawProdOrigins.map(url => url.trim().replace(/['"]/g, "").replace(/\/$/, ""));
+        const prodOrigins = rawProdOrigins.map(url => {
+            let cleaned = url.trim().replace(/['"]/g, "").replace(/\/$/, "");
+            if (cleaned && !cleaned.startsWith('http')) {
+                cleaned = `https://${cleaned}`;
+            }
+            return cleaned;
+        });
         
         const allAllowed = [...devOrigins, ...prodOrigins];
         const cleanOrigin = origin ? origin.replace(/\/$/, "") : null;
