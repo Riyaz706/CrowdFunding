@@ -7,7 +7,7 @@ import morgan from "morgan";
 import { config } from "dotenv";
 
 import userApp from "./routes/userApi.js";
-import adminApp from "./routes/adminApi.js";
+import adminApp from "./routes/AdminApi.js";
 import commonApp from "./routes/commonApp.js";
 import { initCampaignScheduler } from "./services/scheduler.js";
 
