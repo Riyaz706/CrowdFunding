@@ -13,7 +13,13 @@ import { donationModel } from "./models/donationModel.js";
 const app = exp();
 
 // middlewares
-app.use(exp.json());
+app.use(exp.json({
+    verify: (req, res, buf) => {
+        if (req.originalUrl?.includes('/webhook')) {
+            req.rawBody = buf;
+        }
+    }
+}));
 app.use(cookieParser());
 app.use(cors({
     origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],

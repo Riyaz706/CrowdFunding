@@ -1,4 +1,5 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose from "mongoose";
+const { Schema, model } = mongoose;
 
 const donationSchema = new Schema({
     donor: {
@@ -8,7 +9,7 @@ const donationSchema = new Schema({
     },
     campaign: {
         type: Schema.Types.ObjectId,
-        ref: "campaign", // Links to your campaignModel
+        ref: "Campaign", // Links to your campaignModel
         required: [true, "A donation must be linked to a campaign"]
     },
     amount: {

@@ -9,7 +9,7 @@ export default userApp;
 
 // route to view all the campaigns(public)
 userApp.get("/campaigns",async(req,res)=>{
-    let campaignData = await campaignModel.find({status:true});
+    let campaignData = await campaignModel.find({status:true}).populate('creator', 'firstName email');
     if(!campaignData){
         return res.status(404).json({message:"campaign are not available"})
     }
@@ -17,13 +17,28 @@ userApp.get("/campaigns",async(req,res)=>{
 })
 
 // create campaign(protected)
-userApp.post("/create-campaign",verifyToken("USER"), async (req, res) => {
-    let newCampaign = new campaignModel(req.body);
-    let savedCampaign = await newCampaign.save();
-    return res.status(201).json({
-        message: "campaign created successfully",
-        payload: savedCampaign
-    });
+userApp.post("/create-campaign", verifyToken("USER"), async (req, res) => {
+    try {
+        // Automatically set the creator from the authenticated user token
+        const campaignData = {
+            ...req.body,
+            creator: req.user.userId
+        };
+        
+        const newCampaign = new campaignModel(campaignData);
+        const savedCampaign = await newCampaign.save();
+        
+        return res.status(201).json({
+            message: "campaign created successfully",
+            payload: savedCampaign
+        });
+    } catch (error) {
+        console.error("Error creating campaign:", error);
+        return res.status(500).json({
+            message: "Failed to create campaign",
+            error: error.message
+        });
+    }
 });
 
 
@@ -34,11 +49,11 @@ userApp.post("/create-payment-intent", verifyToken("USER"), createPaymentIntent)
 
 // Stripe hits this endpoint when the payment succeeds
 // Note: express.raw() is critical for signature verification
-userApp.post('/webhook', exp.raw({ type: 'application/json' }), handleWebhook);
+userApp.post('/webhook', handleWebhook);
 
 // route to get details of campaign by id
 userApp.get("/campaign/:id", async (req, res) => {
-    let campaign = await campaignModel.findOne({_id:req.params.id,status:true});
+    let campaign = await campaignModel.findOne({_id:req.params.id,status:true}).populate('creator', 'firstName email');
     if (!campaign) {
         return res.status(404).json({
             message: "campaign not found"
@@ -66,3 +81,51 @@ userApp.get("/campaign-history/:campaignId",verifyToken("USER"),async(req,res)=>
     }
     return res.status(201).json({message:"donors retrieved succesfully",payload:donorsDoc.donations})
 })
+
+// route to get campaigns created by the logged-in user
+userApp.get("/my-campaigns", verifyToken("USER"), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const myCampaigns = await campaignModel.find({ creator: userId }).sort({ createdAt: -1 });
+        
+        // Calculate summaries
+        const totalRaised = myCampaigns.reduce((acc, c) => acc + (c.raisedAmount || 0), 0);
+        const totalDonationsReceived = myCampaigns.reduce((acc, c) => acc + (c.donations?.length || 0), 0);
+
+        return res.status(200).json({
+            message: "Your campaigns loaded successfully",
+            payload: myCampaigns,
+            summary: {
+                totalRaised,
+                totalDonationsReceived,
+                totalCampaigns: myCampaigns.length
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to load your campaigns", error: error.message });
+    }
+});
+
+// route to get donations made by the logged-in user
+userApp.get("/my-donations", verifyToken("USER"), async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const myDonations = await donationModel.find({ donor: userId })
+            .populate('campaign', 'title status')
+            .sort({ createdAt: -1 });
+        
+        // Calculate summaries
+        const totalDonated = myDonations.reduce((acc, d) => d.paymentStatus === 'success' ? acc + d.amount : acc, 0);
+
+        return res.status(200).json({
+            message: "Your donations loaded successfully",
+            payload: myDonations,
+            summary: {
+                totalDonated,
+                totalDonationsMade: myDonations.length
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to load your donations", error: error.message });
+    }
+});

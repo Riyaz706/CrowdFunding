@@ -1,19 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import heroImg from "../assets/hero-new.png";
 import { NavLink } from "react-router";
+import axios from "axios";
 
 function Home() {
+  const [stats, setStats] = useState({
+    totalRaised: 0,
+    totalCampaigns: 0,
+    totalDonors: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/common-api/stats");
+        setStats(res.data.payload);
+      } catch (err) {
+        console.error("Error fetching global stats:", err);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const radialBg = {
     background: `radial-gradient(circle at top right, rgba(59, 130, 246, 0.05), transparent),
                  radial-gradient(circle at bottom left, rgba(249, 115, 22, 0.05), transparent)`
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-100" style={radialBg}>
+    <div className="min-h-screen bg-white text-gray-900 selection:bg-blue-100 mt-2" style={radialBg}>
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20 lg:py-32 flex flex-col lg:flex-row items-center justify-between">
-        <div className="lg:w-1/2 space-y-8 translate-y-0 transition-all duration-700">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 font-medium text-sm">
+      <section className="container mx-auto px-1 py-1 lg:py-1 flex flex-col lg:flex-row items-center justify-between">
+        <div className="lg:w-1/2 space-y-8 translate-y-0 transition-all duration-700 bg-amber-300 p-10 rounded-2xl">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 font-medium text-sm ">
             Empowering Visionaries Worldwide
           </div>
           <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight">
@@ -30,7 +49,7 @@ function Home() {
               Start a Campaign
             </NavLink>
             <NavLink
-              to="/campaign-details"
+              to="/campaigns"
               className="px-8 py-4 border-2 border-gray-200 text-gray-900 font-bold rounded-xl hover:bg-gray-50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl text-center"
             >
               Explore Projects
@@ -51,16 +70,16 @@ function Home() {
       {/* Stats Section */}
       <section className="bg-gray-50 py-20">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-          <div className="space-y-2">
-            <p className="text-4xl font-black text-blue-600">$42M+</p>
+          <div className="space-y-2 bg-amber-300 p-10 rounded-2xl">
+            <p className="text-4xl font-black text-blue-600">₹{stats.totalRaised.toLocaleString()}+</p>
             <p className="text-gray-500 font-medium uppercase tracking-wider text-sm">Total Raised</p>
           </div>
-          <div className="space-y-2">
-            <p className="text-4xl font-black text-purple-600">12K+</p>
+          <div className="space-y-2 bg-amber-300 p-10 rounded-2xl">
+            <p className="text-4xl font-black text-purple-600">{stats.totalCampaigns}+</p>
             <p className="text-gray-500 font-medium uppercase tracking-wider text-sm">Active Campaigns</p>
           </div>
-          <div className="space-y-2">
-            <p className="text-4xl font-black text-orange-500">250K+</p>
+          <div className="space-y-2 bg-amber-300 p-10 rounded-2xl">
+            <p className="text-4xl font-black text-orange-500">{stats.totalDonors}+</p>
             <p className="text-gray-500 font-medium uppercase tracking-wider text-sm">Global Donors</p>
           </div>
         </div>
@@ -73,7 +92,7 @@ function Home() {
           <p className="text-gray-500 text-lg">We provide the tools and support you need to make your project successful from day one.</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-amber-300 p-10 rounded-2xl">
           {[
             { 
               title: "Global Reach", 

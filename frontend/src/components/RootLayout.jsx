@@ -1,11 +1,14 @@
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useNavigate } from 'react-router';
 import { authStore } from '../store/authStore';
-import { useNavigate } from 'react-router';
-
+import { useEffect } from 'react';
 
 function RootLayout() {
-    const { isAuthenticated, currentUser, logout } = authStore();
+    const { isAuthenticated, currentUser, logout, checkAuth } = authStore();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
 
     const handleLogout = async () => {
         await logout();
@@ -19,7 +22,7 @@ function RootLayout() {
     return (
         <div className="min-h-screen flex flex-col bg-white">
             {/* Navbar */}
-            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 py-4">
+            <nav className="sticky top-0 z-50 bg-black/30 backdrop-blur-md border-b border-gray-100 py-4">
                 <div className="container mx-auto px-6 flex justify-between items-center">
                     <NavLink to="/home" className="flex items-center gap-2 no-underline group">
                         <div className="w-10 h-10 bg-linear-to-tr from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
@@ -30,7 +33,10 @@ function RootLayout() {
 
                     <div className="hidden lg:flex items-center gap-8">
                         <NavLink to="/home" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Home</NavLink>
-                        <NavLink to="/campaign-details" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Campaigns</NavLink>
+                        <NavLink to="/campaigns" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Campaigns</NavLink>
+                        {currentUser?.role === 'ADMIN' && (
+                            <NavLink to="/admin-approval" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Moderation</NavLink>
+                        )}
                         <NavLink to="/donor-tracking" className={({ isActive }) => `${navLinkClass} ${isActive ? navLinkActiveClass : ""}`}>Track</NavLink>
                         
                         <div className="w-px h-6 bg-gray-200 mx-2"></div>

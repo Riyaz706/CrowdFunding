@@ -45,7 +45,7 @@ Content-Type: application/json
 
 {
     "amount": 5000,
-    "campaignId": "69b7b6924a8c3028217e052b"
+    "campaignId": "69b830c8b65ec50199a7003c"
 }
 
 
@@ -62,12 +62,12 @@ Content-Type: application/json
 }
 
 ### get the details of a campaign
-GET http://localhost:3000/user-api/campaign/69b7b6924a8c3028217e052b
+GET http://localhost:3000/user-api/campaign/69b830c8b65ec50199a7003c
 
 
 
 ###get the donor details of a campaign
-GET http://localhost:3000/user-api/campaign-history/69b7b6924a8c3028217e052b
+GET http://localhost:3000/user-api/campaign-history/69b830c8b65ec50199a7003c
 
 
 

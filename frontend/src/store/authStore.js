@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const authStore = create((set, get) => ({
   currentUser: null,
-  loading: false,
+  loading: true, // Start with loading: true to wait for checkAuth on mount
   error: null,
   isAuthenticated: false,
   login: async (userCredWithRole) => {
@@ -28,6 +28,23 @@ export const authStore = create((set, get) => ({
         error: errorMessage,
         isAuthenticated: false,
         currentUser: null
+      });
+    }
+  },
+  checkAuth: async () => {
+    try {
+      set({ loading: true });
+      const res = await axios.get("http://localhost:3000/common-api/verify-auth", { withCredentials: true });
+      set({
+        isAuthenticated: true,
+        currentUser: res.data.payload,
+        loading: false
+      });
+    } catch (error) {
+      set({
+        isAuthenticated: false,
+        currentUser: null,
+        loading: false
       });
     }
   },

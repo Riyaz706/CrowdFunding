@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router';
 import axios from 'axios';
 
 import { NavLink } from 'react-router';
+import ErrorAlert from './ErrorAlert';
+
 
 function Register() {
   const navigate = useNavigate();
@@ -41,10 +43,10 @@ function Register() {
   };
 
   return (
-    <div className="min-h-[90vh] flex items-center justify-center bg-gray-50 px-6 py-12">
-      <div className="max-w-xl w-full bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 p-10 lg:p-14 space-y-10 border border-gray-100">
+    <div className="min-h-[90vh] flex items-center justify-center bg-gray-50">
+      <div className="max-w-xl w-full bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 p-5 lg:p-14 space-y-10 border border-gray-100">
         <div className="text-center space-y-3">
-          <div className="inline-block px-4 py-1 rounded-full bg-blue-50 text-blue-600 font-bold text-xs uppercase tracking-wider">
+          <div className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 font-bold text-xs uppercase tracking-wider">
             Join the Mission
           </div>
           <h2 className="text-4xl font-black text-gray-900 tracking-tight">Create Account</h2>
@@ -52,14 +54,6 @@ function Register() {
         </div>
 
         <form onSubmit={handleSubmit(onUserRegister)} className="space-y-6">
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3">
-              <svg className="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-sm font-bold text-red-600">{error}</p>
-            </div>
-          )}
           {/* Name Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -138,6 +132,8 @@ function Register() {
             ) : 'Create Account'}
           </button>
           
+          <ErrorAlert message={error} />
+
           <p className="text-center text-gray-500 font-medium pt-2">
             Already have an account? {' '}
             <NavLink to="/login" className="text-blue-600 font-bold hover:underline">Login</NavLink>
