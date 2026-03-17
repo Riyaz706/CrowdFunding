@@ -17,8 +17,8 @@ function CampaignDetails() {
       try {
         setLoading(true);
         const [campaignRes, allRes] = await Promise.all([
-          axios.get(`http://localhost:3000/user-api/campaign/${id}`),
-          axios.get('http://localhost:3000/user-api/campaigns')
+          axios.get(`${import.meta.env.VITE_API_URL}/user-api/campaign/${id}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/user-api/campaigns`)
         ]);
         
         setCampaign(campaignRes.data.payload);

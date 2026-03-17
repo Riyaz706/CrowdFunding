@@ -12,7 +12,7 @@ function Campaigns() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/user-api/campaigns');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/user-api/campaigns`);
         // Ensure payload exists or default to empty array
         setCampaigns(response.data.payload || []);
         setError(null); // Clear any previous errors

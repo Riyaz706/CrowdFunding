@@ -23,7 +23,9 @@ app.use(exp.json({
 }));
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"],
+    origin: process.env.NODE_ENV === "production" 
+        ? [process.env.FRONTEND_URL] 
+        : ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"],
     credentials: true
 }));
 
@@ -31,8 +33,25 @@ const connection = async() => {
     try{
         let connect = await mongoose.connect(process.env.DB_URL)
         console.log("DB connected successfully");
-        app.listen(process.env.PORT, () => {
-            console.log("App is listening on Port", process.env.PORT);
+        
+        // Serve static files in production
+        if (process.env.NODE_ENV === "production") {
+            const path = await import("path");
+            const { fileURLToPath } = await import("url");
+            const __filename = fileURLToPath(import.meta.url);
+            const __dirname = path.dirname(__filename);
+            
+            app.use(exp.static(path.join(__dirname, "../frontend/dist")));
+            
+            app.get("*", (req, res) => {
+                if (!req.path.startsWith("/user-api") && !req.path.startsWith("/admin-api") && !req.path.startsWith("/common-api")) {
+                    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+                }
+            });
+        }
+
+        app.listen(process.env.PORT || 3000, () => {
+            console.log("App is listening on Port", process.env.PORT || 3000);
         });
     }catch(err){
         console.log(err.message);

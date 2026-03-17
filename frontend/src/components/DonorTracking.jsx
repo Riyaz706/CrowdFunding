@@ -26,7 +26,7 @@ function DonorTracking() {
         endpoint = type === 'sent' ? 'my-donations' : 'received-donations';
       }
 
-      const response = await axios.get(`http://localhost:3000/user-api/${endpoint}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/user-api/${endpoint}`, {
         withCredentials: true
       });
       setData(response.data.payload);
@@ -51,7 +51,7 @@ function DonorTracking() {
           const processed = sessionStorage.getItem(`processed_${paymentIntent}`);
           if (!processed) {
             setActiveTab('donations');
-            await axios.get(`http://localhost:3000/user-api/verify-payment/${paymentIntent}`, {
+            await axios.get(`${import.meta.env.VITE_API_URL}/user-api/verify-payment/${paymentIntent}`, {
                withCredentials: true
             });
             console.log("✅ Payment verified successfully");
@@ -105,7 +105,7 @@ function DonorTracking() {
         </div>
 
         {activeTab === 'donations' && (
-            <div className="flex bg-white/50 backdrop-blur-sm p-1.5 rounded-[2rem] border border-gray-100 w-fit mb-12 animate-in fade-in slide-in-from-left-4">
+            <div className="flex bg-white/50 backdrop-blur-sm p-1.5 rounded-4xl border border-gray-100 w-fit mb-12 animate-in fade-in slide-in-from-left-4">
                 <button 
                     onClick={() => setDonationType('sent')}
                     className={`px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${
