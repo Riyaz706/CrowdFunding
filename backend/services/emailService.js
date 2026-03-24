@@ -1,5 +1,11 @@
 import nodemailer from 'nodemailer';
 import { config } from 'dotenv';
+import dns from 'dns';
+
+// Force IPv4 resolution to prevent ENETUNREACH errors on platforms like Render 
+// that have limited IPv6 outbound support for SMTP.
+dns.setDefaultResultOrder('ipv4first');
+
 config();
 
 // Create a transporter using SMTP
