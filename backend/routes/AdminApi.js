@@ -58,7 +58,7 @@ adminApp.put("/campaign/:campaignId", verifyToken("ADMIN"), async(req,res)=>{
         const campaignDoc = await campaignModel.findByIdAndUpdate(
             campaignId,
             { $set: updateData },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
         
         if(!campaignDoc){
@@ -78,7 +78,7 @@ adminApp.put("/campaign/:campaignId", verifyToken("ADMIN"), async(req,res)=>{
 // block or unblock users
 adminApp.put("/user/:userId",verifyToken("ADMIN"),async(req,res)=>{
     let userId = req.params.userId;
-    let userDoc = await userModel.findOneAndUpdate({_id:userId},{$set:{isActive:req.body.status}},{new:true});
+    let userDoc = await userModel.findOneAndUpdate({_id:userId},{$set:{isActive:req.body.status}},{returnDocument: 'after'});
     if(!userDoc){
         return res.status(404).json({message:"User not found"});
     }

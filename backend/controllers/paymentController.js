@@ -95,7 +95,7 @@ export const handleWebhook = async (req, res) => {
                     paymentStatus: 'success',
                     transactionId: intent.id
                 },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: 'after' }
             );
             console.log(`✅ Donation doc saved: ${donationDoc._id}`);
 
@@ -106,7 +106,7 @@ export const handleWebhook = async (req, res) => {
                     $addToSet: { donations: donationDoc._id },
                     $inc: { raisedAmount: amount }
                 },
-                { new: true }
+                { returnDocument: 'after' }
             );
             console.log(`📈 Campaign updated. New raisedAmount: ${campaignUpdate?.raisedAmount}`);
 
@@ -116,7 +116,7 @@ export const handleWebhook = async (req, res) => {
                 {
                     $addToSet: { donations: donationDoc._id }
                 },
-                { new: true }
+                { returnDocument: 'after' }
             );
             console.log(`👤 User history updated for: ${userUpdate?.email}`);
 
@@ -203,7 +203,7 @@ export const verifyPaymentStatus = async (req, res) => {
                 paymentStatus: 'success',
                 transactionId: paymentIntentId
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         );
 
         await campaignModel.findByIdAndUpdate(campaignId, {

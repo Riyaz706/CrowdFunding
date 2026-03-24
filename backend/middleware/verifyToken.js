@@ -28,7 +28,7 @@ export const verifyToken = (...allowedRoles) => {
             if (err.name === "JsonWebTokenError") {
                 return res.status(401).json({ message: "invalid token.Please login again" })
             }
-            // next(err);
+            return res.status(500).json({ message: "Internal server authentication error" });
         }
     }
 }
