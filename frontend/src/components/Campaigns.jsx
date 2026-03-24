@@ -72,15 +72,28 @@ function Campaigns() {
                     src={campaign.imageUrl || "https://images.unsplash.com/photo-1532629345422-7515f3d16bb8?q=80&w=2070&auto=format&fit=crop"} 
                     alt={campaign.title}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    onError={(e) => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg, #1e293b 0%, #334155 100%)'; }}
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-gray-950/60 to-transparent" />
                   
                   {/* Status Badges */}
-                  <div className="absolute top-6 left-6 flex gap-2">
+                  <div className="absolute top-6 left-6 flex gap-2 flex-wrap">
                     {campaign.deadline && (
-                      <div className="px-3 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
-                        {new Date(campaign.deadline) < new Date() ? 'Closed' : 'Active'}
-                      </div>
+                      <>
+                        <div className={`px-3 py-1.5 backdrop-blur-md border text-white text-[10px] font-black uppercase tracking-widest rounded-full ${
+                          new Date(campaign.deadline) < new Date()
+                            ? 'bg-red-500/20 border-red-500/30'
+                            : 'bg-white/10 border-white/20'
+                        }`}>
+                          {new Date(campaign.deadline) < new Date() ? 'Closed' : 'Active'}
+                        </div>
+                        <div className="px-3 py-1.5 bg-black/30 backdrop-blur-md border border-white/10 text-white/90 text-[10px] font-bold rounded-full flex items-center gap-1.5">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {new Date(campaign.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                      </>
                     )}
                   </div>
 

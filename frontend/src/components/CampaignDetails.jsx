@@ -7,6 +7,7 @@ import { authStore } from '../store/authStore';
 
 function CampaignDetails() {
   const { id } = useParams();
+  const { currentUser } = authStore();
   const [campaign, setCampaign] = useState(null);
   const [allCampaigns, setAllCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +60,10 @@ function CampaignDetails() {
 
   const progress = (campaign.raisedAmount / campaign.goalAmount) * 100;
 
+  // Prevent the campaign creator from donating to their own campaign
+  const isOwnCampaign = currentUser && campaign.creator?._id &&
+    (currentUser._id === campaign.creator._id || currentUser._id === campaign.creator?._id?.toString());
+
   return (
     <div className="min-h-screen bg-white">
       {/* Premium Hero Section */}
@@ -69,6 +74,7 @@ function CampaignDetails() {
             src={campaign.imageUrl || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2074&auto=format&fit=crop"} 
             className="w-full h-full object-cover scale-105"
             alt={campaign.title}
+            onError={(e) => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)'; }}
           />
           <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/40 to-transparent" />
           <div className="absolute inset-0 bg-black/20" />
@@ -176,7 +182,17 @@ function CampaignDetails() {
               </div>
 
               <div className="space-y-4 pt-4">
-                {authStore.getState().currentUser?.role !== 'ADMIN' ? (
+                {currentUser?.role === 'ADMIN' ? (
+                  <div className="p-8 bg-blue-50 border border-blue-100 rounded-4xl text-center">
+                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">Admin Mode</p>
+                    <p className="text-sm font-bold text-gray-600 leading-relaxed">Financial interaction restricted for administrative accounts.</p>
+                  </div>
+                ) : isOwnCampaign ? (
+                  <div className="p-8 bg-amber-50 border border-amber-100 rounded-4xl text-center space-y-2">
+                    <p className="text-xs font-black text-amber-600 uppercase tracking-widest">Your Campaign</p>
+                    <p className="text-sm font-bold text-gray-600 leading-relaxed">You cannot donate to your own campaign.</p>
+                  </div>
+                ) : (
                   <>
                     {isActive ? (
                       <NavLink 
@@ -184,7 +200,7 @@ function CampaignDetails() {
                           className="group relative block w-full py-6 bg-gray-950 text-white overflow-hidden rounded-4xl hover:bg-black transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-95"
                       >
                         <div className="relative z-10 flex items-center justify-center gap-3">
-                           <span className="font-black text-lg uppercase tracking-widest">Back this Project</span>
+                           <span className="font-black text-lg uppercase tracking-widest">Donate Now</span>
                            <svg className="w-6 h-6 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                            </svg>
@@ -200,11 +216,6 @@ function CampaignDetails() {
                     )}
                     <p className="text-[10px] text-gray-400 text-center font-black uppercase tracking-widest pt-4">Direct Contribution • 100% Impact</p>
                   </>
-                ) : (
-                  <div className="p-8 bg-blue-50 border border-blue-100 rounded-4xl text-center">
-                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest mb-2">Admin Mode</p>
-                    <p className="text-sm font-bold text-gray-600 leading-relaxed">Financial interaction restricted for administrative accounts.</p>
-                  </div>
                 )}
               </div>
             </div>

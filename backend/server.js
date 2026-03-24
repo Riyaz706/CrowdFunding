@@ -20,7 +20,14 @@ const app = express();
 ========================= */
 
 // security headers
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "img-src": ["'self'", "data:", "https:", "http:"],
+        },
+    },
+}));
 
 // logging
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
