@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, NavLink } from 'react-router';
 import axios from 'axios';
+import BASE_URL from '../config/api';
 import ErrorAlert from './ErrorAlert';
 import { authStore } from '../store/authStore';
 
@@ -18,8 +19,8 @@ function CampaignDetails() {
       try {
         setLoading(true);
         const [campaignRes, allRes] = await Promise.all([
-          axios.get(`http://localhost:3000/user-api/campaign/${id}`),
-          axios.get('http://localhost:3000/user-api/campaigns')
+          axios.get(`${BASE_URL}/user-api/campaign/${id}`),
+          axios.get(`${BASE_URL}/user-api/campaigns`)
         ]);
         
         setCampaign(campaignRes.data.payload);

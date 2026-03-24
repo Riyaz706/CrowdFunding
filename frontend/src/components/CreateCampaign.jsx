@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import axios from 'axios';
+import BASE_URL from '../config/api';
 import ErrorAlert from './ErrorAlert';
 
 // ─────────────────────────────────────────────────────────
@@ -103,7 +104,7 @@ function CreateCampaign() {
       }
 
       const response = await axios.post(
-        'http://localhost:3000/user-api/create-campaign',
+        `${BASE_URL}/user-api/create-campaign`,
         { ...data, imageUrl },
         { withCredentials: true }
       );

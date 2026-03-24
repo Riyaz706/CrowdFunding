@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import heroImg from "../assets/hero-new.png";
 import { NavLink } from "react-router";
 import axios from "axios";
+import BASE_URL from "../config/api";
 import { authStore } from "../store/authStore";
 
 function Home() {
@@ -15,7 +16,7 @@ function Home() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/common-api/stats");
+        const res = await axios.get(`${BASE_URL}/common-api/stats`);
         setStats(res.data.payload);
       } catch (err) {
         console.error("Error fetching global stats:", err);

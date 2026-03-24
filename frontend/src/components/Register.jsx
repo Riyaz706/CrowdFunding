@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import axios from 'axios';
+import BASE_URL from '../config/api';
 
 import { NavLink } from 'react-router';
 import ErrorAlert from './ErrorAlert';
@@ -25,7 +26,7 @@ function Register() {
     try {
       setLoading(true);
       setError(null);
-      const url = 'http://localhost:3000/common-api/register';
+      const url = `${BASE_URL}/common-api/register`;
       const res = await axios.post(url, data);
 
       if (res.status === 201 || res.status === 200) {

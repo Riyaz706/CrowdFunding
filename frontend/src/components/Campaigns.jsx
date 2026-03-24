@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import axios from 'axios';
+import BASE_URL from '../config/api';
 import ErrorAlert from './ErrorAlert';
 
 
@@ -12,7 +13,7 @@ function Campaigns() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/user-api/campaigns');
+        const response = await axios.get(`${BASE_URL}/user-api/campaigns`);
         // Ensure payload exists or default to empty array
         setCampaigns(response.data.payload || []);
         setError(null); // Clear any previous errors

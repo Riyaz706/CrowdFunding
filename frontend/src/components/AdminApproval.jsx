@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import axios from 'axios';
+import BASE_URL from '../config/api';
 import ErrorAlert from './ErrorAlert';
 import { authStore } from '../store/authStore';
 
@@ -18,7 +19,7 @@ function AdminApproval() {
   const fetchPending = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/admin-api/pending-campaigns', {
+      const response = await axios.get(`${BASE_URL}/admin-api/pending-campaigns`, {
         withCredentials: true
       });
       setPendingCampaigns(response.data.payload);
@@ -33,7 +34,7 @@ function AdminApproval() {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/admin-api/all-donations', {
+      const response = await axios.get(`${BASE_URL}/admin-api/all-donations`, {
         withCredentials: true
       });
       setTransactions(response.data.payload);
@@ -48,7 +49,7 @@ function AdminApproval() {
   const fetchLive = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/admin-api/all-campaigns', {
+      const response = await axios.get(`${BASE_URL}/admin-api/all-campaigns`, {
         withCredentials: true
       });
       // Filter live campaigns (status true)
@@ -70,7 +71,7 @@ function AdminApproval() {
   const handleUpdateStatus = async (id, newStatus) => {
     try {
       setActionLoading(id);
-      await axios.put(`http://localhost:3000/admin-api/campaign/${id}`, 
+      await axios.put(`${BASE_URL}/admin-api/campaign/${id}`, 
         { status: newStatus },
         { withCredentials: true }
       );
@@ -91,7 +92,7 @@ function AdminApproval() {
     e.preventDefault();
     try {
       setActionLoading(editingCampaign._id);
-      await axios.put(`http://localhost:3000/admin-api/campaign/${editingCampaign._id}`, 
+      await axios.put(`${BASE_URL}/admin-api/campaign/${editingCampaign._id}`, 
         editingCampaign,
         { withCredentials: true }
       );

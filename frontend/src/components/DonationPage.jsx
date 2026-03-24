@@ -3,6 +3,7 @@ import { useParams, NavLink, useNavigate } from 'react-router';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
+import BASE_URL from '../config/api';
 import ErrorAlert from './ErrorAlert';
 
 // ⚠️ IMPORTANT: Replace this placeholder with your ACTUAL Stripe Publishable Key
@@ -70,7 +71,7 @@ function DonationPage() {
 
     const fetchCampaign = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/user-api/campaign/${campaignId}`);
+        const response = await axios.get(`${BASE_URL}/user-api/campaign/${campaignId}`);
         setCampaign(response.data.payload);
       } catch (err) {
         setError('Campaign not found.');
@@ -88,7 +89,7 @@ function DonationPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.post('http://localhost:3000/user-api/create-payment-intent', {
+      const response = await axios.post(`${BASE_URL}/user-api/create-payment-intent`, {
         amount: parseInt(amount),
         campaignId,
         description // Pass message to backend

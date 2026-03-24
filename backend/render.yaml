@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: crowdfunding-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # ⬇️  Set these manually in the Render dashboard (do NOT commit real secrets)
+      # DB_URL        → your MongoDB Atlas connection string
+      # JWT_SECRET    → a long random secret (change from the default!)
+      # STRIPE_SECRET_KEY → your Stripe secret key
+      # STRIPE_WEBHOOK_SECRET → your Stripe webhook secret
+      # EMAIL_HOST    → smtp.gmail.com
+      # EMAIL_PORT    → 587
+      # EMAIL_USER    → your Gmail address
+      # EMAIL_PASS    → your Gmail app password
+      # EMAIL_FROM    → your Gmail address
+      # CLIENT_URL    → your Vercel frontend URL (e.g. https://crowd-funding.vercel.app)
