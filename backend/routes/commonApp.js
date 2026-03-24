@@ -28,10 +28,11 @@ commonApp.post("/login",async(req,res,next)=>{
         // call authenticate service
         let { token, user } = await authentication(userCred);
         // save token as httpOnly
+        const isProd = process.env.NODE_ENV === 'production';
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false,
+            sameSite: isProd ? "none" : "lax",
+            secure: isProd,
             path: '/'
         })
         // send res
@@ -87,10 +88,11 @@ commonApp.get("/stats", async (req, res) => {
 
 // logout (allow both GET and POST for convenience)
 commonApp.all("/logout", async (req, res) => {
+    const isProd = process.env.NODE_ENV === 'production';
     res.clearCookie("token", {
         httpOnly: true,
-        secure: false, // Set to true if using HTTPS
-        sameSite: "lax",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
         path: '/'
     });
     res.status(200).json({ message: "logout successful" });
